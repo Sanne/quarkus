@@ -222,6 +222,12 @@ public class FastBootMetadataBuilder {
             LOG.definingFlushBeforeCompletionIgnoredInHem(Environment.FLUSH_BEFORE_COMPLETION);
         }
 
+        // Make sure to quote all identifiers (e.g. prevent casing issues on PostgreSQL) by default:
+        if (!mergedSettings.configurationValues.containsKey(org.hibernate.cfg.AvailableSettings.GLOBALLY_QUOTED_IDENTIFIERS)) {
+            mergedSettings.configurationValues.put(org.hibernate.cfg.AvailableSettings.GLOBALLY_QUOTED_IDENTIFIERS,
+                    Boolean.TRUE);
+        }
+
         // Quarkus specific
 
         mergedSettings.configurationValues.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
