@@ -60,8 +60,8 @@
             <artifactId>avro</artifactId>
             <version>1.9.1</version>
         </dependency>
-        <dependency>
-            <!-- Not in Maven Central -->
+        <!--<dependency>
+            &lt;!&ndash; Not in Maven Central &ndash;&gt;
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
             <version>5.4.1</version>
@@ -71,7 +71,7 @@
                     <artifactId>swagger-core</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
 
 
         <!-- test dependencies -->
