@@ -217,7 +217,7 @@ public final class HibernateOrmProcessor {
     @BuildStep
     List<HotDeploymentWatchedFileBuildItem> hotDeploymentWatchedFiles(LaunchModeBuildItem launchMode) {
         List<HotDeploymentWatchedFileBuildItem> watchedFiles = new ArrayList<>();
-        if (shouldIgnorePersistenceXmlResources()) {
+        if (shouldProcessPersistenceXmlResources()) {
             watchedFiles.add(new HotDeploymentWatchedFileBuildItem("META-INF/persistence.xml"));
         }
         watchedFiles.add(new HotDeploymentWatchedFileBuildItem(INTEGRATOR_SERVICE_FILE));
@@ -231,7 +231,7 @@ public final class HibernateOrmProcessor {
     @BuildStep
     public void parsePersistenceXmlDescriptors(
             BuildProducer<PersistenceXmlDescriptorBuildItem> persistenceXmlDescriptorBuildItemBuildProducer) {
-        if (!shouldIgnorePersistenceXmlResources()) {
+        if (shouldProcessPersistenceXmlResources()) {
             List<ParsedPersistenceXmlDescriptor> explicitDescriptors = QuarkusPersistenceXmlParser.locatePersistenceUnits();
             for (ParsedPersistenceXmlDescriptor desc : explicitDescriptors) {
                 persistenceXmlDescriptorBuildItemBuildProducer.produce(new PersistenceXmlDescriptorBuildItem(desc));
@@ -1142,10 +1142,11 @@ public final class HibernateOrmProcessor {
      * "SKIP_PARSE_PERSISTENCE_XML" to fully ignore any persistence.xml
      * resource.
      *
-     * @return true if we're expected to ignore them
+     * @return true if we're expected to find and parse all persistence.xml resources
      */
-    private boolean shouldIgnorePersistenceXmlResources() {
-        return Boolean.getBoolean("SKIP_PARSE_PERSISTENCE_XML");
+    private boolean shouldProcessPersistenceXmlResources() {
+        //This always returns true unless the SKIP_PARSE_PERSISTENCE_XML system property is set to true
+        return !Boolean.getBoolean("SKIP_PARSE_PERSISTENCE_XML");
     }
 
     /**
