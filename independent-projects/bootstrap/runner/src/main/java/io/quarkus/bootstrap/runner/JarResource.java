@@ -4,6 +4,7 @@ import io.smallrye.common.io.jar.JarEntries;
 import io.smallrye.common.io.jar.JarFiles;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,7 +25,7 @@ public class JarResource implements ClassLoadingResource {
 
     private final ManifestInfo manifestInfo;
     private final Path jarPath;
-    private volatile JarFile zipFile;
+    private volatile SoftReference<JarFile> zipFileRef;
 
     public JarResource(ManifestInfo manifestInfo, Path jarPath) {
         this.manifestInfo = manifestInfo;
@@ -99,37 +100,43 @@ public class JarResource implements ClassLoadingResource {
     }
 
     private JarFile file() {
-        JarFile zipFileLocal = this.zipFile;
-        if ( zipFileLocal == null) {
+        SoftReference<JarFile> zipFileLocal = this.zipFileRef;
+        JarFile jarFile = zipFileLocal != null ? zipFileLocal.get() : null;
+        if (jarFile == null) {
             synchronized (this) {
-                zipFileLocal = this.zipFile;
-                if ( zipFileLocal == null) {
+                zipFileLocal = this.zipFileRef;
+                jarFile = zipFileLocal != null ? zipFileLocal.get() : null;
+                if (jarFile == null) {
                     try {
-                        return this.zipFile = JarFiles.create( jarPath.toFile());
+                        jarFile = JarFiles.create(jarPath.toFile());
+                        this.zipFileRef = new SoftReference<>( jarFile );
+                        return jarFile;
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to open " + jarPath, e);
                     }
                 }
                 else {
-                    return zipFileLocal;
+                    return jarFile;
                 }
             }
         }
         else {
-            return zipFileLocal;
+            return jarFile;
         }
     }
 
     @Override
     public void close() {
-        JarFile zipFileLocal = this.zipFile;
+        System.out.println("Dropping reference to :" + this.jarPath);
+        SoftReference<JarFile> zipFileRef = this.zipFileRef;
+        final JarFile zipFileLocal = zipFileRef == null ? null : zipFileRef.get();
         if (zipFileLocal != null) {
             try {
                 zipFileLocal.close();
             } catch (IOException e) {
                 //ignore
             }
-            this.zipFile = null;
+            this.zipFileRef = null;
         }
     }
 }

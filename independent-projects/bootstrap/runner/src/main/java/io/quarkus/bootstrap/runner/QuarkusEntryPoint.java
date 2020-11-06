@@ -40,6 +40,7 @@ public class QuarkusEntryPoint {
                 app = SerializedApplication.read(in, appRoot);
                 Thread.currentThread().setContextClassLoader(app.getRunnerClassLoader());
                 Class<?> mainClass = app.getRunnerClassLoader().loadClass(app.getMainClass());
+                System.out.println("Abouit to start");
                 mainClass.getMethod("main", String[].class).invoke(null, args);
 
             } finally {

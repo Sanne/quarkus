@@ -129,6 +129,7 @@ public class ApplicationLifecycleManager {
                     }
                 }
             } else {
+                longLivedPostBootCleanup();
                 stateLock.lock();
                 try {
                     while (!shutdownRequested) {
@@ -179,6 +180,16 @@ public class ApplicationLifecycleManager {
             application.stop(); //this could have already been called
         }
         (exitCodeHandler == null ? defaultExitCodeHandler : exitCodeHandler).accept(getExitCode(), null); //this may not be called if shutdown was initiated by a signal
+    }
+
+    /**
+     * Run some background cleanup once *after* the application has booted.
+     * This will not be invoked for command mode, as it's not worth it for a short lived process.
+     */
+    private static void longLivedPostBootCleanup() {
+        System.out.println("POST BOOT HOOK");
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        cl.
     }
 
     private static void registerHooks(final BiConsumer<Integer, Throwable> exitCodeHandler) {
