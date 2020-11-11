@@ -28,9 +28,9 @@ public final class JpaEntitiesBuildItem extends SimpleBuildItem {
     }
 
     void registerAllForReflection(final BuildProducer<ReflectiveClassBuildItem> reflectiveClass) {
-        for (String className : allModelClassNames) {
-            reflectiveClass.produce(new ReflectiveClassBuildItem(true, true, className));
-        }
+//        for (String className : allModelClassNames) {
+//            reflectiveClass.produce(new ReflectiveClassBuildItem(true, true, className));
+//        }
     }
 
     /**

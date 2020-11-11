@@ -90,19 +90,19 @@ final class JpaJandexScavenger {
                     managedClassNames, unindexedClasses);
         }
 
-        domainObjectCollector.registerAllForReflection(reflectiveClass);
+//        domainObjectCollector.registerAllForReflection(reflectiveClass);
 
         if (!enumTypeCollector.isEmpty()) {
-            reflectiveClass.produce(new ReflectiveClassBuildItem(true, false, Enum.class.getName()));
-            for (String className : enumTypeCollector) {
-                reflectiveClass.produce(new ReflectiveClassBuildItem(true, false, className));
-            }
+//            reflectiveClass.produce(new ReflectiveClassBuildItem(true, false, Enum.class.getName()));
+//            for (String className : enumTypeCollector) {
+//                reflectiveClass.produce(new ReflectiveClassBuildItem(true, false, className));
+//            }
         }
 
         // for the java. types we collected (usually from java.time but it could be from other types),
         // we just register them for reflection
         for (String javaType : javaTypeCollector) {
-            reflectiveClass.produce(new ReflectiveClassBuildItem(true, false, javaType));
+//            reflectiveClass.produce(new ReflectiveClassBuildItem(true, false, javaType));
         }
 
         if (!unindexedClasses.isEmpty()) {
