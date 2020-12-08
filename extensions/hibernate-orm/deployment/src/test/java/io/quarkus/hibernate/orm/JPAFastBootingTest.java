@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.wildfly.common.Assert;
 
-import io.quarkus.bootstrap.classloading.ClassLoaderStats;
+import io.quarkus.bootstrap.classloading.ClassLoaderLimiter;
 import io.quarkus.hibernate.orm.enhancer.Address;
 import io.quarkus.test.QuarkusUnitTest;
 
@@ -19,7 +19,7 @@ import io.quarkus.test.QuarkusUnitTest;
  */
 public class JPAFastBootingTest {
 
-    private static final ClassLoaderStats stats = new ClassLoaderStats();
+    private static final ClassLoaderLimiter stats = new ClassLoaderLimiter();
 
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()

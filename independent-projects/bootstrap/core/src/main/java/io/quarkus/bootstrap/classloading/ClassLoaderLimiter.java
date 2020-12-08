@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ClassLoaderStats implements ClassLoaderEventListener {
+public class ClassLoaderLimiter implements ClassLoaderEventListener {
 
     private final ConcurrentMap<String, PerClassLoaderStats> classLoaderStats = new ConcurrentHashMap();
     private static final AtomicInteger ZERO = new AtomicInteger();

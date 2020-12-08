@@ -1,9 +1,8 @@
 package io.quarkus.hibernate.orm.envers;
 
-import io.quarkus.bootstrap.classloading.ClassLoaderStats;
+import io.quarkus.bootstrap.classloading.ClassLoaderLimiter;
 import io.quarkus.test.QuarkusUnitTest;
 import org.hibernate.Session;
-import org.hibernate.boot.jaxb.internal.MappingBinder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ import javax.inject.Inject;
  */
 public class EnversFastBootingTest {
 
-    private static final ClassLoaderStats stats = new ClassLoaderStats();
+    private static final ClassLoaderLimiter stats = new ClassLoaderLimiter();
 
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()
