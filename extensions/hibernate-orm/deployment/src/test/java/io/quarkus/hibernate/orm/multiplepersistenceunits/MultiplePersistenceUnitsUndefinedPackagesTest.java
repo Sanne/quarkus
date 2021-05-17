@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.User;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.MultiPuUser;
 import io.quarkus.runtime.configuration.ConfigurationException;
 import io.quarkus.test.QuarkusUnitTest;
 
@@ -16,7 +16,7 @@ public class MultiplePersistenceUnitsUndefinedPackagesTest {
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setExpectedException(ConfigurationException.class)
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(User.class)
+                    .addClass(MultiPuUser.class)
                     .addAsResource("application-multiple-persistence-units-undefined-packages.properties",
                             "application.properties"));
 

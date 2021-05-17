@@ -22,7 +22,7 @@ public class EntitiesInNamedPUWithoutDatasourceTest {
             })
             .overrideConfigKey("quarkus.datasource.devservices", "false")
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addPackage(MyEntity.class.getPackage().getName())
+                    .addPackage(NamedPuEntity.class.getPackage().getName())
                     .addAsResource("application-named-pu-no-datasource.properties",
                             "application.properties"));
 

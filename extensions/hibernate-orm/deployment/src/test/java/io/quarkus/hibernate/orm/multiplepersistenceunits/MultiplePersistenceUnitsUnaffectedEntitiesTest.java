@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkus.hibernate.orm.PersistenceUnit;
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.DefaultEntity;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.SinglePuDefaultEntity;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.inventory.Plane;
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.User;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.MultiPuUser;
 import io.quarkus.test.QuarkusUnitTest;
 
 public class MultiplePersistenceUnitsUnaffectedEntitiesTest {
@@ -29,8 +29,8 @@ public class MultiplePersistenceUnitsUnaffectedEntitiesTest {
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(DefaultEntity.class)
-                    .addClass(User.class)
+                    .addClass(SinglePuDefaultEntity.class)
+                    .addClass(MultiPuUser.class)
                     .addClass(Plane.class)
                     .addAsResource("application-multiple-persistence-units-unaffected-entities.properties",
                             "application.properties"))
@@ -42,8 +42,8 @@ public class MultiplePersistenceUnitsUnaffectedEntitiesTest {
                     .element(0).satisfies(record -> {
                         assertThat(record.getLevel()).isEqualTo(Level.WARNING);
                         assertThat(LOG_FORMATTER.formatMessage(record))
-                                .contains(DefaultEntity.class.getName())
-                                .contains(User.class.getName());
+                                .contains(SinglePuDefaultEntity.class.getName())
+                                .contains(MultiPuUser.class.getName());
                     }));
 
     @Inject

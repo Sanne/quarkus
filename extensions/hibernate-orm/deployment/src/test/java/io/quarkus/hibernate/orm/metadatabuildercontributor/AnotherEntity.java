@@ -1,16 +1,16 @@
-package io.quarkus.hibernate.orm.config;
+package io.quarkus.hibernate.orm.metadatabuildercontributor;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class MyEntity {
+public class AnotherEntity {
     @Id
     private long id;
 
     private String name;
 
-    public MyEntity() {
+    public AnotherEntity() {
     }
 
     public long getId() {

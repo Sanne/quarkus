@@ -22,7 +22,7 @@ public class BatchFetchSizeTest {
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClass(MainEntity.class)
-                    .addClass(OtherEntity.class)
+                    .addClass(BatchOtherEntity.class)
                     .addAsResource("application.properties"));
 
     @Inject
@@ -37,7 +37,7 @@ public class BatchFetchSizeTest {
         for (int i = 0; i < 20; i++) {
             MainEntity mainEntity = new MainEntity();
             for (int j = 0; j < 10; j++) {
-                OtherEntity otherEntity = new OtherEntity();
+                BatchOtherEntity otherEntity = new BatchOtherEntity();
                 session.persist(otherEntity);
                 mainEntity.others.add(otherEntity);
             }

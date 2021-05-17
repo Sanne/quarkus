@@ -9,7 +9,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.inventory.Plane;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.inventory.MultiPuPlane;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.shared.SharedEntity;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.user.User;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.user.subpackage.OtherUserInSubPackage;
@@ -23,7 +23,7 @@ public class MultiplePersistenceUnitsImportSqlHotReloadScriptTest {
     @RegisterExtension
     final static QuarkusDevModeTest TEST = new QuarkusDevModeTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addPackage(Plane.class.getPackage().getName())
+                    .addPackage(MultiPuPlane.class.getPackage().getName())
                     .addPackage(SharedEntity.class.getPackage().getName())
                     .addPackage(User.class.getPackage().getName())
                     .addPackage(OtherUserInSubPackage.class.getPackage().getName())

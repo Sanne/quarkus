@@ -24,7 +24,7 @@ public class EntitiesInDefaultPUWithExplicitUnconfiguredDatasourceTest {
                                 "Refer to https://quarkus.io/guides/datasource for guidance.");
             })
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(MyEntity.class)
+                    .addClass(ConfigMyEntity.class)
                     .addAsResource("application-default-pu-explicit-unconfigured-datasource.properties",
                             "application.properties"));
 

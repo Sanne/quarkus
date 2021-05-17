@@ -6,16 +6,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class DefaultEntity {
+public class SinglePuDefaultEntity {
 
     private long id;
 
     private String name;
 
-    public DefaultEntity() {
+    public SinglePuDefaultEntity() {
     }
 
-    public DefaultEntity(String name) {
+    public SinglePuDefaultEntity(String name) {
         this.name = name;
     }
 

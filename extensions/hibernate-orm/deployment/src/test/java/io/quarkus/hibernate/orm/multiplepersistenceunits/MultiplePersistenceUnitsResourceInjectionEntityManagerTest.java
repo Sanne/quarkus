@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.inventory.Plane;
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.User;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.MultiPuUser;
 import io.quarkus.test.QuarkusUnitTest;
 
 public class MultiplePersistenceUnitsResourceInjectionEntityManagerTest {
@@ -21,7 +21,7 @@ public class MultiplePersistenceUnitsResourceInjectionEntityManagerTest {
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(User.class)
+                    .addClass(MultiPuUser.class)
                     .addClass(Plane.class)
                     .addAsResource("application-multiple-persistence-units.properties", "application.properties"));
 
@@ -34,10 +34,10 @@ public class MultiplePersistenceUnitsResourceInjectionEntityManagerTest {
     @Test
     @Transactional
     public void testUser() {
-        User user = new User("gsmet");
+        MultiPuUser user = new MultiPuUser("gsmet");
         usersEntityManager.persist(user);
 
-        User savedUser = usersEntityManager.find(User.class, user.getId());
+        MultiPuUser savedUser = usersEntityManager.find(MultiPuUser.class, user.getId());
         assertEquals(user.getName(), savedUser.getName());
     }
 
@@ -54,7 +54,7 @@ public class MultiplePersistenceUnitsResourceInjectionEntityManagerTest {
     @Test
     @Transactional
     public void testUserInInventoryEntityManager() {
-        User user = new User("gsmet");
+        MultiPuUser user = new MultiPuUser("gsmet");
         assertThatThrownBy(() -> inventoryEntityManager.persist(user)).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown entity");
     }

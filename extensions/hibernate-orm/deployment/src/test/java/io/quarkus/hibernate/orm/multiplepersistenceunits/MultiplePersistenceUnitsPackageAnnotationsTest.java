@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkus.hibernate.orm.PersistenceUnit;
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.inventory.Plane;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.inventory.MultiPuPlane;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.shared.SharedEntity;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.user.User;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.annotation.user.subpackage.OtherUserInSubPackage;
@@ -24,7 +24,7 @@ public class MultiplePersistenceUnitsPackageAnnotationsTest {
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addPackage(Plane.class.getPackage().getName())
+                    .addPackage(MultiPuPlane.class.getPackage().getName())
                     .addPackage(SharedEntity.class.getPackage().getName())
                     .addPackage(User.class.getPackage().getName())
                     .addPackage(OtherUserInSubPackage.class.getPackage().getName())
@@ -83,10 +83,10 @@ public class MultiplePersistenceUnitsPackageAnnotationsTest {
     @Test
     @Transactional
     public void testPlane() {
-        Plane plane = new Plane("Airbus A380");
+        MultiPuPlane plane = new MultiPuPlane("Airbus A380");
         inventoryEntityManager.persist(plane);
 
-        Plane savedPlane = inventoryEntityManager.find(Plane.class, plane.getId());
+        MultiPuPlane savedPlane = inventoryEntityManager.find(MultiPuPlane.class, plane.getId());
         assertEquals(plane.getName(), savedPlane.getName());
     }
 

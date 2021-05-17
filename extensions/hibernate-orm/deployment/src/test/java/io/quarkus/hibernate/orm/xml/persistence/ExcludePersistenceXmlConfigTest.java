@@ -27,7 +27,7 @@ public class ExcludePersistenceXmlConfigTest {
             .setBeforeAllCustomizer(() -> System.setProperty(SKIP_PARSE_PERSISTENCE_XML, "true"))
             .setAfterAllCustomizer(() -> System.getProperties().remove(SKIP_PARSE_PERSISTENCE_XML))
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(MyEntity.class)
+                    .addClass(XmlMappedEntity.class)
                     .addAsManifestResource("META-INF/some-persistence.xml", "persistence.xml")
                     .addAsResource("application.properties", "application.properties"));
 
@@ -56,11 +56,11 @@ public class ExcludePersistenceXmlConfigTest {
     @Test
     @Transactional
     public void smokeTest() {
-        MyEntity persistedEntity = new MyEntity("someName");
+        XmlMappedEntity persistedEntity = new XmlMappedEntity("someName");
         entityManager.persist(persistedEntity);
         entityManager.flush();
         entityManager.clear();
-        MyEntity retrievedEntity = entityManager.find(MyEntity.class, persistedEntity.id);
+        XmlMappedEntity retrievedEntity = entityManager.find(XmlMappedEntity.class, persistedEntity.id);
         assertThat(retrievedEntity.name).isEqualTo(persistedEntity.name);
     }
 

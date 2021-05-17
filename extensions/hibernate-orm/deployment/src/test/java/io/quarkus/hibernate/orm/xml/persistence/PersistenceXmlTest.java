@@ -23,7 +23,7 @@ public class PersistenceXmlTest {
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClass(SmokeTestUtils.class)
-                    .addClass(MyEntity.class)
+                    .addClass(XmlMappedEntity.class)
                     .addAsManifestResource("META-INF/some-persistence.xml", "persistence.xml")
                     .addAsResource("application-datasource-only.properties", "application.properties"));
 
@@ -46,7 +46,7 @@ public class PersistenceXmlTest {
     @Transactional
     public void smokeTest() {
         SmokeTestUtils.testSimplePersistRetrieveUpdateDelete(entityManager,
-                MyEntity.class, MyEntity::new,
+                XmlMappedEntity.class, XmlMappedEntity::new,
                 e -> e.id, (e, value) -> e.name = value, e -> e.name);
     }
 

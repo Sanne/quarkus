@@ -4,17 +4,17 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class MyEntity {
+public class XmlMappedEntity {
 
     @Id
     public long id;
 
     public String name;
 
-    public MyEntity() {
+    public XmlMappedEntity() {
     }
 
-    public MyEntity(String name) {
+    public XmlMappedEntity(String name) {
         this.name = name;
     }
 

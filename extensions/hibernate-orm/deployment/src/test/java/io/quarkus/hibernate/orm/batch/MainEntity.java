@@ -16,7 +16,7 @@ public class MainEntity {
     public Long id;
 
     @OneToMany
-    public List<OtherEntity> others = new ArrayList<>();
+    public List<BatchOtherEntity> others = new ArrayList<>();
 
     public MainEntity() {
     }

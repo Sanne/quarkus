@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkus.hibernate.orm.PersistenceUnit;
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.DefaultEntity;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.SinglePuDefaultEntity;
 import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.inventory.Plane;
-import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.User;
+import io.quarkus.hibernate.orm.multiplepersistenceunits.model.config.user.MultiPuUser;
 import io.quarkus.test.QuarkusUnitTest;
 
 public class MultiplePersistenceUnitsCdiEntityManagerTest {
@@ -23,8 +23,8 @@ public class MultiplePersistenceUnitsCdiEntityManagerTest {
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(DefaultEntity.class)
-                    .addClass(User.class)
+                    .addClass(SinglePuDefaultEntity.class)
+                    .addClass(MultiPuUser.class)
                     .addClass(Plane.class)
                     .addAsResource("application-multiple-persistence-units.properties", "application.properties"));
 
@@ -42,20 +42,21 @@ public class MultiplePersistenceUnitsCdiEntityManagerTest {
     @Test
     @Transactional
     public void testDefault() {
-        DefaultEntity defaultEntity = new DefaultEntity("default");
+        SinglePuDefaultEntity defaultEntity = new SinglePuDefaultEntity("default");
         defaultEntityManager.persist(defaultEntity);
 
-        DefaultEntity savedDefaultEntity = defaultEntityManager.find(DefaultEntity.class, defaultEntity.getId());
+        SinglePuDefaultEntity savedDefaultEntity = defaultEntityManager.find(SinglePuDefaultEntity.class,
+                defaultEntity.getId());
         assertEquals(defaultEntity.getName(), savedDefaultEntity.getName());
     }
 
     @Test
     @Transactional
     public void testUser() {
-        User user = new User("gsmet");
+        MultiPuUser user = new MultiPuUser("gsmet");
         usersEntityManager.persist(user);
 
-        User savedUser = usersEntityManager.find(User.class, user.getId());
+        MultiPuUser savedUser = usersEntityManager.find(MultiPuUser.class, user.getId());
         assertEquals(user.getName(), savedUser.getName());
     }
 
@@ -72,7 +73,7 @@ public class MultiplePersistenceUnitsCdiEntityManagerTest {
     @Test
     @Transactional
     public void testUserInInventoryEntityManager() {
-        User user = new User("gsmet");
+        MultiPuUser user = new MultiPuUser("gsmet");
         assertThatThrownBy(() -> inventoryEntityManager.persist(user)).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown entity");
     }

@@ -4,13 +4,13 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class MyEntity {
+public class NamedPuEntity {
     @Id
     private long id;
 
     private String name;
 
-    public MyEntity() {
+    public NamedPuEntity() {
     }
 
     public long getId() {

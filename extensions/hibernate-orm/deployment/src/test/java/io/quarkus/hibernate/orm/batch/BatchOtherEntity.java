@@ -6,12 +6,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class OtherEntity {
+public class BatchOtherEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq2")
     public Long id;
 
-    public OtherEntity() {
+    public BatchOtherEntity() {
     }
 
     @Override
