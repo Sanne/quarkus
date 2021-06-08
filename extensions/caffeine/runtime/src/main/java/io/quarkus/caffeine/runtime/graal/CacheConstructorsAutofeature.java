@@ -23,7 +23,9 @@ import com.oracle.svm.core.annotate.AutomaticFeature;
 @AutomaticFeature
 public class CacheConstructorsAutofeature implements Feature {
 
-    private final AtomicBoolean triggered = new AtomicBoolean(false);
+    private final AtomicBoolean triggeredLocalCacheFactoryClass = new AtomicBoolean(false);
+    private final AtomicBoolean triggeredNodeFactoryClass = new AtomicBoolean(false);
+    private static final String SHARED_CLASSNAME_PREFIX = "com.github.benmanes.caffeine.cache.";
 
     /**
      * To set this, add `-J-Dio.quarkus.caffeine.graalvm.diagnostics=true` to the native-image parameters
@@ -32,24 +34,37 @@ public class CacheConstructorsAutofeature implements Feature {
 
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
-        Class<?> caffeineCoreClazz = access.findClassByName("com.github.benmanes.caffeine.cache.Caffeine");
-        access.registerReachabilityHandler(this::ensureCaffeineSupportEnabled, caffeineCoreClazz);
+        Class<?> localCacheFactoryClass = access.findClassByName("com.github.benmanes.caffeine.cache.LocalCacheFactory");
+        access.registerReachabilityHandler(this::ensureLocalCacheFactorySupported, localCacheFactoryClass);
+        Class<?> nodeFactoryClass = access.findClassByName("com.github.benmanes.caffeine.cache.NodeFactory");
+        access.registerReachabilityHandler(this::ensureNodeFactorySupported, nodeFactoryClass);
     }
 
-    private void ensureCaffeineSupportEnabled(DuringAnalysisAccess duringAnalysisAccess) {
-        final boolean needsEnablingYet = triggered.compareAndSet(false, true);
+    private void ensureNodeFactorySupported(DuringAnalysisAccess duringAnalysisAccess) {
+        final boolean needsEnablingYet = triggeredNodeFactoryClass.compareAndSet(false, true);
         if (needsEnablingYet) {
             if (log) {
                 System.out.println(
-                        "Quarkus's automatic feature for GraalVM native images: enabling support for core Caffeine caches");
+                        "Quarkus's automatic feature for GraalVM native images: enabling limited support for Caffeine's [com.github.benmanes.caffeine.cache.NodeFactory]");
             }
-            registerCaffeineReflections(duringAnalysisAccess);
+            registerCaffeineReflections(duringAnalysisAccess, typesfromNodeFactory());
         }
     }
 
-    private void registerCaffeineReflections(DuringAnalysisAccess duringAnalysisAccess) {
-        final String[] needsHavingSimpleConstructors = typesNeedingConstructorsRegistered();
-        for (String className : needsHavingSimpleConstructors) {
+    private void ensureLocalCacheFactorySupported(DuringAnalysisAccess duringAnalysisAccess) {
+        final boolean needsEnablingYet = triggeredLocalCacheFactoryClass.compareAndSet(false, true);
+        if (needsEnablingYet) {
+            if (log) {
+                System.out.println(
+                        "Quarkus's automatic feature for GraalVM native images: enabling limited support for Caffeine's [com.github.benmanes.caffeine.cache.LocalCacheFactory]");
+            }
+            registerCaffeineReflections(duringAnalysisAccess, typesfromLocalCacheFactory());
+        }
+    }
+
+    private void registerCaffeineReflections(DuringAnalysisAccess duringAnalysisAccess, String[] strings) {
+        for (String postfix : strings) {
+            String className = SHARED_CLASSNAME_PREFIX + postfix;
             registerForReflection(className, duringAnalysisAccess);
         }
     }
@@ -63,25 +78,38 @@ public class CacheConstructorsAutofeature implements Feature {
         RuntimeReflection.register(z);
     }
 
-    public static String[] typesNeedingConstructorsRegistered() {
+    // N.B. the following lists are not complete, but a selection of the types we expect being most useful.
+    // unfortunately registering all of them has been shown to have a very significant impact
+    // on executable sizes.
+    // For this reason we also keep two separate lists: we might be able to need only one of them.
+    // See https://github.com/quarkusio/quarkus/issues/12961
+
+    public static String[] typesfromLocalCacheFactory() {
         return new String[] {
-                //N.B. this list is not complete, but a selection of the types we expect being most useful.
-                //unfortunately registering all of them has been shown to have a very significant impact
-                //on executable sizes. See https://github.com/quarkusio/quarkus/issues/12961
-                "com.github.benmanes.caffeine.cache.PDMS",
-                "com.github.benmanes.caffeine.cache.PSA",
-                "com.github.benmanes.caffeine.cache.PSMS",
-                "com.github.benmanes.caffeine.cache.PSW",
-                "com.github.benmanes.caffeine.cache.PSWMS",
-                "com.github.benmanes.caffeine.cache.PSWMW",
-                "com.github.benmanes.caffeine.cache.SILMS",
-                "com.github.benmanes.caffeine.cache.SSA",
-                "com.github.benmanes.caffeine.cache.SSLA",
-                "com.github.benmanes.caffeine.cache.SSLMS",
-                "com.github.benmanes.caffeine.cache.SSMS",
-                "com.github.benmanes.caffeine.cache.SSMSA",
-                "com.github.benmanes.caffeine.cache.SSMSW",
-                "com.github.benmanes.caffeine.cache.SSW",
+                // Starting with S means strong keys from com.github.benmanes.caffeine.cache.LocalCacheFactory.newBoundedLocalCache :
+                // Second char 'I' means weak values: triggered by com.github.benmanes.caffeine.cache.Caffeine.weakValues
+                // If 3rd char is 'L' listeners must have been registered: triggered by com.github.benmanes.caffeine.cache.Caffeine.removalListener
+                "SILMS",
+                "SSA",
+                "SSLA",
+                "SSLMS",
+                "SSMS",
+                "SSMSA",
+                "SSMSW",
+                "SSW",
+        };
+    }
+
+    public static String[] typesfromNodeFactory() {
+        return new String[] {
+                // See LocalCacheFactory and NodeFactory for the naming pattern:
+                //Starting with P means strong keys from com.github.benmanes.caffeine.cache.NodeFactory.newFactory :
+                "PDMS", //PD = strong keys, values are neither strong nor weak
+                "PSA", //PS = strong keys && strong values
+                "PSMS", //PS = strong keys && strong values
+                "PSW", //PS = strong keys && strong values
+                "PSWMS", //PS = strong keys && strong values
+                "PSWMW", //PS = strong keys && strong values
         };
     }
 
