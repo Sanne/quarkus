@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
@@ -301,6 +302,14 @@ public final class PgSQLXML implements SQLXML {
     }
 
     private void maybeProcessAsDomResult() throws SQLException {
+        try {
+            PgSQLXML.class.getMethod("reallyPRocessAsDomResult").invoke(this);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Unexpected failure in reflective call - please report");
+        }
+    }
+
+    private void reallyPRocessAsDomResult() throws SQLException {
         if (domResult != null) {
             DOMResult domResult = this.domResult;
             // Copy the content from the result to a source
