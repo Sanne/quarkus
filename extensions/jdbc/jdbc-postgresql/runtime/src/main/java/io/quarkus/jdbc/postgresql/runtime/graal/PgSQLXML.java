@@ -297,8 +297,9 @@ public final class PgSQLXML implements SQLXML {
             data = stringWriter.toString();
             stringWriter = null;
             active = false;
-        } else
+        } else if (domResult != null) {
             maybeProcessAsDomResult();
+        }
     }
 
     private void maybeProcessAsDomResult() throws SQLException {
@@ -310,26 +311,24 @@ public final class PgSQLXML implements SQLXML {
     }
 
     private void reallyPRocessAsDomResult() throws SQLException {
-        if (domResult != null) {
-            DOMResult domResult = this.domResult;
-            // Copy the content from the result to a source
-            // and use the identify transform to get it into a
-            // friendlier result format.
-            try {
-                TransformerFactory factory = getXmlFactoryFactory().newTransformerFactory();
-                Transformer transformer = factory.newTransformer();
-                DOMSource domSource = new DOMSource(domResult.getNode());
-                StringWriter stringWriter = new StringWriter();
-                StreamResult streamResult = new StreamResult(stringWriter);
-                transformer.transform(domSource, streamResult);
-                data = stringWriter.toString();
-            } catch (TransformerException te) {
-                throw new PSQLException(GT.tr("Unable to convert DOMResult SQLXML data to a string."),
-                        PSQLState.DATA_ERROR, te);
-            } finally {
-                domResult = null;
-                active = false;
-            }
+        DOMResult domResult = this.domResult;
+        // Copy the content from the result to a source
+        // and use the identify transform to get it into a
+        // friendlier result format.
+        try {
+            TransformerFactory factory = getXmlFactoryFactory().newTransformerFactory();
+            Transformer transformer = factory.newTransformer();
+            DOMSource domSource = new DOMSource(domResult.getNode());
+            StringWriter stringWriter = new StringWriter();
+            StreamResult streamResult = new StreamResult(stringWriter);
+            transformer.transform(domSource, streamResult);
+            data = stringWriter.toString();
+        } catch (TransformerException te) {
+            throw new PSQLException(GT.tr("Unable to convert DOMResult SQLXML data to a string."),
+                    PSQLState.DATA_ERROR, te);
+        } finally {
+            domResult = null;
+            active = false;
         }
     }
 
