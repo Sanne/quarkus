@@ -305,8 +305,18 @@ public final class PgSQLXML implements SQLXML {
     private void maybeProcessAsDomResult() throws SQLException {
         try {
             PgSQLXML.class.getMethod("reallyPRocessAsDomResult").invoke(this);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        }
+        catch (NoSuchMethodException|IllegalAccessException e) {
             throw new RuntimeException("Unexpected failure in reflective call - please report");
+        }
+        catch (InvocationTargetException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof SQLException) {
+                throw (SQLException) cause;
+            }
+            else {
+                throw new RuntimeException("Unexpected failure in reflective call - please report");
+            }
         }
     }
 
