@@ -304,23 +304,20 @@ public final class PgSQLXML implements SQLXML {
 
     private void maybeProcessAsDomResult() throws SQLException {
         try {
-            PgSQLXML.class.getMethod("reallyPRocessAsDomResult").invoke(this);
-        }
-        catch (NoSuchMethodException|IllegalAccessException e) {
+            PgSQLXML.class.getMethod("reallyProcessAsDomResult").invoke(this);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException("Unexpected failure in reflective call - please report");
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof SQLException) {
                 throw (SQLException) cause;
-            }
-            else {
+            } else {
                 throw new RuntimeException("Unexpected failure in reflective call - please report");
             }
         }
     }
 
-    private void reallyPRocessAsDomResult() throws SQLException {
+    public void reallyProcessAsDomResult() throws SQLException {
         DOMResult domResult = this.domResult;
         // Copy the content from the result to a source
         // and use the identify transform to get it into a
