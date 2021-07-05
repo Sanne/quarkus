@@ -9,12 +9,10 @@ import java.util.stream.Collectors;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 
-import io.quarkus.arc.deployment.UnremovableBeanBuildItem;
 import io.quarkus.arc.deployment.ValidationPhaseBuildItem;
 import io.quarkus.builder.BuildException;
 import io.quarkus.deployment.Feature;
@@ -43,7 +41,7 @@ public final class PanacheHibernateResourceProcessor {
     static final DotName DOTNAME_PANACHE_ENTITY_BASE = DotName.createSimple(PanacheEntityBase.class.getName());
     private static final DotName DOTNAME_PANACHE_ENTITY = DotName.createSimple(PanacheEntity.class.getName());
 
-    private static final DotName DOTNAME_REACTIVE_SESSION = DotName.createSimple(Mutiny.Session.class.getName());
+    //    private static final DotName DOTNAME_REACTIVE_SESSION = DotName.createSimple(Mutiny.Session.class.getName());
 
     private static final DotName DOTNAME_ID = DotName.createSimple(Id.class.getName());
     protected static final String META_INF_PANACHE_ARCHIVE_MARKER = "META-INF/panache-archive.marker";
@@ -61,11 +59,11 @@ public final class PanacheHibernateResourceProcessor {
         // only transforms classes from the application jar, so we do our own transforming
         return new AdditionalJpaModelBuildItem("io.quarkus.hibernate.reactive.panache.PanacheEntity");
     }
-
-    @BuildStep
-    UnremovableBeanBuildItem ensureBeanLookupAvailable() {
-        return UnremovableBeanBuildItem.beanTypes(DOTNAME_REACTIVE_SESSION);
-    }
+    //
+    //    @BuildStep
+    //    UnremovableBeanBuildItem ensureBeanLookupAvailable() {
+    //        return UnremovableBeanBuildItem.beanTypes(DOTNAME_REACTIVE_SESSION);
+    //    }
 
     @BuildStep
     AdditionalApplicationArchiveMarkerBuildItem marker() {

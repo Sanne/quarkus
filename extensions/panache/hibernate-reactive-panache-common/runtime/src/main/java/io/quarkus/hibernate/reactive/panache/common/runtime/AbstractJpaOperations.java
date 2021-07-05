@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.util.TypeLiteral;
 import javax.persistence.LockModeType;
 
 import org.hibernate.internal.util.LockModeConverter;
@@ -22,6 +22,7 @@ import org.hibernate.reactive.mutiny.Mutiny;
 import org.hibernate.reactive.mutiny.Mutiny.Session;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.hibernate.reactive.runtime.ReactiveSessionProducer;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.panache.hibernate.common.runtime.PanacheJpaUtil;
@@ -31,6 +32,8 @@ import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 
 public abstract class AbstractJpaOperations<PanacheQueryType> {
+
+    private static final TypeLiteral<Uni<Mutiny.Session>> MUTINY_SESSION_LOOKUP_LITERAL = new TypeLiteral<>() {};
 
     // FIXME: make it configurable?
     static final long TIMEOUT_MS = 5000;
@@ -86,12 +89,12 @@ public abstract class AbstractJpaOperations<PanacheQueryType> {
     }
 
     public boolean isPersistent(Object entity) {
-        // only attempt to look up the request context session if it's already there: do not
-        // run the producer method otherwise, before we know which thread we're on
-        Session requestSession = isInRequestContext(Mutiny.Session.class) ? Arc.container().instance(Mutiny.Session.class).get()
-                : null;
-        if (requestSession != null) {
-            return requestSession.contains(entity);
+        // only attempt to look up the request context session if it's already there: no
+        // need to open a new Session only to check if it's a managed entity.
+        ReactiveSessionProducer rsp = Arc.container().instance(ReactiveSessionProducer.class).get();
+        final Session sessionIfOpen = rsp.getCurrentSessionIfOpen();
+        if (sessionIfOpen != null) {
+            return sessionIfOpen.contains(entity);
         } else {
             return false;
         }
@@ -107,14 +110,14 @@ public abstract class AbstractJpaOperations<PanacheQueryType> {
     public static Uni<Mutiny.Session> getSession() {
         // only attempt to look up the request context session if it's already there: do not
         // run the producer method otherwise, before we know which thread we're on
-        Session requestSession = isInRequestContext(Mutiny.Session.class) ? Arc.container().instance(Mutiny.Session.class).get()
-                : null;
+        ReactiveSessionProducer rsp = Arc.container().instance(ReactiveSessionProducer.class).get();
+        final Session requestSession = rsp.getCurrentSessionIfOpen();
         if (requestSession != null) {
             return Uni.createFrom().item(requestSession);
         }
 
         if (io.vertx.core.Context.isOnVertxThread()) {
-            return Uni.createFrom().item(Arc.container().instance(Mutiny.Session.class).get());
+            return Arc.container().instance(MUTINY_SESSION_LOOKUP_LITERAL).get();
         } else {
             // FIXME: we may need context propagation
             Vertx vertx = Arc.container().instance(Vertx.class).get();
@@ -143,16 +146,9 @@ public abstract class AbstractJpaOperations<PanacheQueryType> {
                 }
 
             };
-            return Uni.createFrom().item(() -> Arc.container().instance(Mutiny.Session.class).get())
+            return Arc.container().instance(MUTINY_SESSION_LOOKUP_LITERAL).get()
                     .runSubscriptionOn(executor);
         }
-    }
-
-    private static boolean isInRequestContext(Class<?> klass) {
-        Set<Bean<?>> beans = Arc.container().beanManager().getBeans(klass);
-        if (beans.isEmpty())
-            return false;
-        return Arc.container().requestContext().get(beans.iterator().next()) != null;
     }
 
     public static Mutiny.Query<?> bindParameters(Mutiny.Query<?> query, Object[] params) {
