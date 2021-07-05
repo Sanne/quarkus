@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkus.test.QuarkusUnitTest;
+import io.smallrye.mutiny.Uni;
 
 public class NoJtaTest {
 
@@ -34,7 +35,7 @@ public class NoJtaTest {
     SessionFactory sessionFactory; // This is an ORM SessionFactory, but it's backing Hibernate Reactive.
 
     @Inject
-    Mutiny.Session session;
+    Uni<Mutiny.Session> sessionUni;
 
     @Test
     @ActivateRequestContext
@@ -48,8 +49,11 @@ public class NoJtaTest {
 
         // Quick test to make sure HRX works
         MyEntity entity = new MyEntity("default");
-        MyEntity retrievedEntity = session.withTransaction(tx -> session.persist(entity))
-                .chain(() -> session.withTransaction(tx -> session.clear().find(MyEntity.class, entity.getId())))
+
+        //It's not very usable to inject a Uni<Mutiny.Session> but let's test it anyway as Panache Reactive will need it:
+        MyEntity retrievedEntity = sessionUni.chain(session -> session.withTransaction(tx -> session.persist(entity))
+                .chain(() -> session.withTransaction(tx -> session.clear()
+                        .find(MyEntity.class, entity.getId()))))
                 .await().indefinitely();
         assertThat(retrievedEntity)
                 .isNotSameAs(entity)
