@@ -110,6 +110,13 @@ public abstract class AbstractJpaOperations<PanacheQueryType> {
     // Private stuff
 
     public static Uni<Mutiny.Session> getSession() {
+        final Uni<Session> sessionInternal = getSessionInternal();
+        return sessionInternal.invoke( s-> {
+            if (s==null) throw new IllegalStateException("Boom");
+        } );
+    }
+
+    public static Uni<Mutiny.Session> getSessionInternal() {
         // only attempt to look up the request context session if it's already there: do not
         // run the producer method otherwise, before we know which thread we're on
         ReactiveSessionProducer rsp = Arc.container().instance(ReactiveSessionProducer.class).get();
@@ -123,31 +130,6 @@ public abstract class AbstractJpaOperations<PanacheQueryType> {
         } else {
             // FIXME: we may need context propagation
             Vertx vertx = Arc.container().instance(Vertx.class).get();
-            Executor executor = runnable -> {
-                // this will be the context for a VertxThread, or a ThreadLocal context otherwise, but not null
-                Context context = vertx.getOrCreateContext();
-                // currentContext() returns null for non-VertxThread
-                if (Vertx.currentContext() == context) {
-                    runnable.run();
-                } else {
-                    // this needs to be sync
-                    CompletableFuture<Void> cf = new CompletableFuture<>();
-                    vertx.runOnContext(v -> {
-                        try {
-                            runnable.run();
-                            cf.complete(null);
-                        } catch (Throwable t) {
-                            cf.completeExceptionally(t);
-                        }
-                    });
-                    try {
-                        cf.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
-                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-            };
 
             final Supplier<Uni<Session>> supplier = () -> Arc.container()
                     .instance( MUTINY_SESSION_LOOKUP_LITERAL )
