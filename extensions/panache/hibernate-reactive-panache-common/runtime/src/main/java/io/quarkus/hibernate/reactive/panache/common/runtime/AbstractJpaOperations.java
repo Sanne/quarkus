@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -26,6 +27,7 @@ import io.quarkus.hibernate.reactive.runtime.ReactiveSessionProducer;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.panache.hibernate.common.runtime.PanacheJpaUtil;
+import io.smallrye.common.function.ExceptionSupplier;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.Context;
@@ -146,8 +148,21 @@ public abstract class AbstractJpaOperations<PanacheQueryType> {
                 }
 
             };
-            return Arc.container().instance(MUTINY_SESSION_LOOKUP_LITERAL).get()
-                    .runSubscriptionOn(executor);
+
+            final Supplier<Uni<Session>> supplier = () -> Arc.container()
+                    .instance( MUTINY_SESSION_LOOKUP_LITERAL )
+                    .get();
+
+            CompletableFuture<Uni<Session>> cf = new CompletableFuture<>();
+            vertx.runOnContext(v -> {
+                try {
+                    final Uni<Session> sessionUni = supplier.get();
+                    cf.complete(sessionUni);
+                } catch (Throwable t) {
+                    cf.completeExceptionally(t);
+                }
+            });
+            return Uni.createFrom().completionStage(cf).chain( s->s );
         }
     }
 

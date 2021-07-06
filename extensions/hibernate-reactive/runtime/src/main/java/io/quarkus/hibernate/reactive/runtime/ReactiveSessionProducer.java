@@ -53,7 +53,7 @@ public class ReactiveSessionProducer {
             final Cancellable subscribe = closeOperation.subscribe().with(
                     item -> removeTracking(),
                     failure -> failedCloseSession(failure));
-            currentSessionToBeClosedUni.set( closeOperation);
+            currentSessionToBeClosedUni.set(closeOperation);
 
         }
     }
