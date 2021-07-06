@@ -15,7 +15,7 @@ import io.smallrye.mutiny.subscription.Cancellable;
 @ApplicationScoped
 public class ReactiveSessionProducer {
 
-    private final ThreadLocal<Uni<Void>> currentSessionUni = new ThreadLocal<>();
+    private final ThreadLocal<Uni<Void>> currentSessionToBeClosedUni = new ThreadLocal<>();
     private final ThreadLocal<Mutiny.Session> currentlyOpenSession = new ThreadLocal<>();
 
     @Inject
@@ -25,7 +25,7 @@ public class ReactiveSessionProducer {
     @RequestScoped
     @DefaultBean
     public Uni<Mutiny.Session> createMutinySessionUni() {
-        Uni<Void> beingClosed = currentSessionUni.get();
+        Uni<Void> beingClosed = currentSessionToBeClosedUni.get();
         if (beingClosed == null) {
             return sessionOpeningUni();
         } else {
@@ -48,12 +48,12 @@ public class ReactiveSessionProducer {
     public void disposeMutinySession(@Disposes Uni<Mutiny.Session> reactiveSessionUni) {
         if (reactiveSessionUni != null) {
             currentlyOpenSession.remove();//track current session as no longer open
-            final Uni<Void> closeOperation = reactiveSessionUni.chain(s -> s.close());
+            final Uni<Void> closeOperation = reactiveSessionUni.chain(Mutiny.Session::close);
 
             final Cancellable subscribe = closeOperation.subscribe().with(
                     item -> removeTracking(),
                     failure -> failedCloseSession(failure));
-            currentSessionUni.set(closeOperation);
+            currentSessionToBeClosedUni.set( closeOperation);
 
         }
     }
@@ -64,7 +64,7 @@ public class ReactiveSessionProducer {
     }
 
     private void removeTracking() {
-        currentSessionUni.remove();
+        currentSessionToBeClosedUni.remove();
     }
 
     /**
