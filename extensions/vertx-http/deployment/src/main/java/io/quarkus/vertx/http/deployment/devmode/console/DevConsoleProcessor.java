@@ -229,6 +229,7 @@ public class DevConsoleProcessor {
         final VertxOptions vertxOptions = new VertxOptions();
         //Smaller than default, but larger than 1 to be on the safe side.
         int POOL_SIZE = 2;
+        vertxOptions.setDisableTCCL(true);
         vertxOptions.setEventLoopPoolSize(POOL_SIZE);
         vertxOptions.setWorkerPoolSize(POOL_SIZE);
         vertxOptions.getMetricsOptions().setEnabled(false);
