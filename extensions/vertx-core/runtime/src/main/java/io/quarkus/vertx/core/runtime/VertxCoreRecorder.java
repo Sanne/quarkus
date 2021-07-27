@@ -8,8 +8,6 @@ import static io.quarkus.vertx.core.runtime.SSLConfigHelper.configurePfxTrustOpt
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -179,24 +177,9 @@ public class VertxCoreRecorder {
     /**
      * Extract the JBoss Threads EnhancedQueueExecutor from the Vertx instance
      * and reset all threads to use the given ClassLoader.
-     * This is messy as it needs to use reflection until Vertx can expose it:
-     * - https://github.com/eclipse-vertx/vert.x/pull/4029
      */
     private void resetExecutorsClassloaderContext(WorkerPool workerPool, ClassLoader cl) {
-        final Method executorMethod;
-        try {
-            executorMethod = WorkerPool.class.getDeclaredMethod("executor");
-            executorMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        final Object result;
-        try {
-            result = executorMethod.invoke(workerPool);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-        EnhancedQueueExecutor executor = (EnhancedQueueExecutor) result;
+        EnhancedQueueExecutor executor = (EnhancedQueueExecutor) workerPool.executor();
         final Thread[] runningThreads = executor.getRunningThreads();
         for (Thread t : runningThreads) {
             t.setContextClassLoader(cl);
