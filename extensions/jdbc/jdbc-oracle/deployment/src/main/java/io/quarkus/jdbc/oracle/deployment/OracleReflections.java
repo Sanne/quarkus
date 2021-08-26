@@ -2,6 +2,7 @@ package io.quarkus.jdbc.oracle.deployment;
 
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
+import io.quarkus.deployment.builditem.nativeimage.ExcludeConfigBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
 
@@ -12,6 +13,9 @@ import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildI
  * @author Sanne Grinovero <sanne@hibernate.org>
  */
 public final class OracleReflections {
+
+    static final String DRIVER_JAR_MATCH_REGEX = ".*com\\.oracle\\.database\\.jdbc.*";
+    static final String NATIVE_IMAGE_RESOURCE_MATCH_REGEX = ".*\\native-image.properties";
 
     @BuildStep
     void build(BuildProducer<ReflectiveClassBuildItem> reflectiveClass) {
@@ -42,4 +46,10 @@ public final class OracleReflections {
         runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.NoSupportHAManager"));
         runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.LogicalConnection"));
     }
+
+    @BuildStep
+    ExcludeConfigBuildItem excludeOracleDirectives() {
+        return new ExcludeConfigBuildItem(DRIVER_JAR_MATCH_REGEX, NATIVE_IMAGE_RESOURCE_MATCH_REGEX);
+    }
+
 }
