@@ -15,7 +15,7 @@ import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildI
 public final class OracleReflections {
 
     static final String DRIVER_JAR_MATCH_REGEX = ".*com\\.oracle\\.database\\.jdbc.*";
-    static final String NATIVE_IMAGE_RESOURCE_MATCH_REGEX = ".*\\native-image.properties";
+    static final String NATIVE_IMAGE_RESOURCE_MATCH_REGEX = ".*/native-image.properties";
 
     @BuildStep
     void build(BuildProducer<ReflectiveClassBuildItem> reflectiveClass) {
@@ -30,7 +30,7 @@ public final class OracleReflections {
 
     @BuildStep
     void runtimeInitializeDriver(BuildProducer<RuntimeInitializedClassBuildItem> runtimeInitialized) {
-        runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.OracleDriver"));
+        //        runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.OracleDriver"));
         runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.SQLUtil$XMLFactory"));
         runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.NamedTypeAccessor$XMLFactory"));
         runtimeInitialized.produce(new RuntimeInitializedClassBuildItem("oracle.jdbc.driver.OracleTimeoutThreadPerVM"));
