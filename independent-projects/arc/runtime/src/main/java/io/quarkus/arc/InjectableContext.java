@@ -1,6 +1,5 @@
 package io.quarkus.arc;
 
-import java.util.Map;
 import java.util.function.Function;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.NormalScope;
@@ -67,15 +66,7 @@ public interface InjectableContext extends AlterableContext {
      * 
      * @param state
      */
-    default void destroy(ContextState state) {
-        for (InjectableBean<?> bean : state.getContextualInstances().keySet()) {
-            try {
-                destroy(bean);
-            } catch (Exception e) {
-                throw new IllegalStateException("Unable to destroy contextual instance of " + bean, e);
-            }
-        }
-    }
+    void destroy(ContextState state);
 
     /**
      * 
@@ -89,11 +80,6 @@ public interface InjectableContext extends AlterableContext {
     *
     */
     interface ContextState {
-
-        /**
-         * @return an immutable map of contextual instances
-         */
-        Map<InjectableBean<?>, Object> getContextualInstances();
 
     }
 }

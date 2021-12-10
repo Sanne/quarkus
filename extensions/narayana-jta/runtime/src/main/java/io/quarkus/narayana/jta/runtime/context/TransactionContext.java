@@ -226,18 +226,6 @@ public class TransactionContext implements InjectableContext {
             mapBeanToInstanceHandle.clear();
         }
 
-        /**
-         * Method required by the {@link io.quarkus.arc.InjectableContext.ContextState} interface
-         * which is then used to get state of the scope in method {@link InjectableContext#getState()}
-         *
-         * @return list of context bean and the bean instances which are available in the container
-         */
-        @Override
-        public Map<InjectableBean<?>, Object> getContextualInstances() {
-            return mapBeanToInstanceHandle.values().stream()
-                    .collect(Collectors.toMap(ContextInstanceHandle::getBean, ContextInstanceHandle::get));
-        }
-
         @Override
         public void beforeCompletion() {
         }

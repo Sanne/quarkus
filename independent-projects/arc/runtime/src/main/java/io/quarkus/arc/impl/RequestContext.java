@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Destroyed;
@@ -226,12 +225,6 @@ class RequestContext implements ManagedContext {
 
         RequestContextState(ConcurrentMap<Contextual<?>, ContextInstanceHandle<?>> value) {
             this.value = value;
-        }
-
-        @Override
-        public Map<InjectableBean<?>, Object> getContextualInstances() {
-            return value.values().stream()
-                    .collect(Collectors.toUnmodifiableMap(ContextInstanceHandle::getBean, ContextInstanceHandle::get));
         }
 
     }

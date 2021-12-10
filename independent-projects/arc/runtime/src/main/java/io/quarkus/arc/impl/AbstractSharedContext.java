@@ -4,10 +4,8 @@ import io.quarkus.arc.ContextInstanceHandle;
 import io.quarkus.arc.InjectableBean;
 import io.quarkus.arc.InjectableContext;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 
@@ -47,12 +45,6 @@ abstract class AbstractSharedContext implements InjectableContext, InjectableCon
     @Override
     public ContextState getStateIfActive() {
         return this;
-    }
-
-    @Override
-    public Map<InjectableBean<?>, Object> getContextualInstances() {
-        return instances.getPresentValues().stream()
-                .collect(Collectors.toUnmodifiableMap(ContextInstanceHandle::getBean, ContextInstanceHandle::get));
     }
 
     @Override

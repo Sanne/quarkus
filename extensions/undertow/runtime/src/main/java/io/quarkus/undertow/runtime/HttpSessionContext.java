@@ -68,15 +68,6 @@ public class HttpSessionContext implements InjectableContext, HttpSessionListene
     public ContextState getState() {
         return new ContextState() {
 
-            @Override
-            public Map<InjectableBean<?>, Object> getContextualInstances() {
-                HttpServletRequest httpServletRequest = servletRequest();
-                if (httpServletRequest != null) {
-                    return HttpSessionContext.this.getContextualInstances(httpServletRequest).getPresentValues().stream()
-                            .collect(Collectors.toMap(ContextInstanceHandle::getBean, ContextInstanceHandle::get));
-                }
-                return Collections.emptyMap();
-            }
         };
     }
 
