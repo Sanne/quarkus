@@ -1,10 +1,7 @@
 package io.quarkus.undertow.runtime;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.SessionScoped;
@@ -69,6 +66,11 @@ public class HttpSessionContext implements InjectableContext, HttpSessionListene
         return new ContextState() {
 
         };
+    }
+
+    @Override
+    public void destroy(ContextState state) {
+        //TBD
     }
 
     @Override

@@ -144,6 +144,10 @@ public class CustomPseudoScopeTest {
         }
 
         @Override
+        public void destroy(ContextState state) {
+        }
+
+        @Override
         public ContextState getState() {
             throw new UnsupportedOperationException();
         }

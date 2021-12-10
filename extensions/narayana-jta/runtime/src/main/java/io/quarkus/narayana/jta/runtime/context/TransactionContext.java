@@ -1,11 +1,9 @@
 package io.quarkus.narayana.jta.runtime.context;
 
 import java.lang.annotation.Annotation;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.spi.Contextual;
@@ -90,6 +88,11 @@ public class TransactionContext implements InjectableContext {
             result = contextState;
         }
         return result;
+    }
+
+    @Override
+    public void destroy(ContextState state) {
+        //TBD
     }
 
     @Override
