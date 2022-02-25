@@ -85,6 +85,16 @@
                     <artifactId>javax.activation-api</artifactId>
                 </exclusion>
 
+                <!-- Exclude for now: banned before migration to Jakarta packages -->
+                <exclusion>
+                    <groupId>jakarta.activation</groupId>
+                    <artifactId>jakarta.activation-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+
                 <!-- Not necessary at runtime -->
                 <exclusion>
                     <groupId>org.jboss</groupId>
