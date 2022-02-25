@@ -3,11 +3,11 @@ package io.quarkus.hibernate.orm.runtime;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.RequestScoped;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * Bean that is used to manage request scoped sessions

@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Optional;
 
-import javax.enterprise.inject.Default;
-
 import org.hibernate.MultiTenancyStrategy;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.jboss.logging.Logger;
@@ -17,6 +15,7 @@ import io.quarkus.agroal.DataSource;
 import io.quarkus.arc.Arc;
 import io.quarkus.datasource.common.runtime.DataSourceUtil;
 import io.quarkus.hibernate.orm.runtime.customized.QuarkusConnectionProvider;
+import jakarta.enterprise.inject.Default;
 
 /**
  * Creates a database connection based on the data sources in the configuration file.
