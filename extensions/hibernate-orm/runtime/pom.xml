@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
+            <artifactId>hibernate-core-jakarta</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>javax.persistence</groupId>
