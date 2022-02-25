@@ -1,10 +1,10 @@
 package io.quarkus.hibernate.orm.runtime.boot.xml;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import io.quarkus.runtime.ObjectSubstitution;
 import io.quarkus.runtime.annotations.RecordableConstructor;
+import jakarta.xml.bind.JAXBElement;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class JAXBElementSubstitution implements ObjectSubstitution<JAXBElement, JAXBElementSubstitution.Serialized> {

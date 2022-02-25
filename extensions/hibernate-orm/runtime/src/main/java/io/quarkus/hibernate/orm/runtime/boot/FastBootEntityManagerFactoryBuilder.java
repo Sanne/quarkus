@@ -3,9 +3,6 @@ package io.quarkus.hibernate.orm.runtime.boot;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
 import org.hibernate.Interceptor;
@@ -34,6 +31,9 @@ import io.quarkus.hibernate.orm.runtime.PersistenceUnitUtil;
 import io.quarkus.hibernate.orm.runtime.RuntimeSettings;
 import io.quarkus.hibernate.orm.runtime.recording.PrevalidatedQuarkusMetadata;
 import io.quarkus.hibernate.orm.runtime.tenant.HibernateCurrentTenantIdentifierResolver;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceException;
 
 public class FastBootEntityManagerFactoryBuilder implements EntityManagerFactoryBuilder {
 

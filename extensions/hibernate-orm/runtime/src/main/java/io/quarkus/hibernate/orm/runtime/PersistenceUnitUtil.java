@@ -2,14 +2,13 @@ package io.quarkus.hibernate.orm.runtime;
 
 import java.util.Locale;
 
-import javax.enterprise.inject.Default;
-
 import org.jboss.logging.Logger;
 
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.InjectableInstance;
 import io.quarkus.hibernate.orm.PersistenceUnit;
 import io.quarkus.hibernate.orm.PersistenceUnitExtension;
+import jakarta.enterprise.inject.Default;
 
 public class PersistenceUnitUtil {
     private static final Logger LOG = Logger.getLogger(PersistenceUnitUtil.class);

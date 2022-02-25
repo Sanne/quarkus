@@ -1,15 +1,15 @@
 package io.quarkus.hibernate.orm.runtime.customized;
 
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
 import org.hibernate.engine.transaction.jta.platform.internal.JtaSynchronizationStrategy;
 import org.hibernate.engine.transaction.jta.platform.internal.TransactionManagerAccess;
 import org.hibernate.engine.transaction.jta.platform.internal.TransactionManagerBasedSynchronizationStrategy;
 import org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform;
+
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 
 public final class QuarkusJtaPlatform implements JtaPlatform, TransactionManagerAccess {
 
