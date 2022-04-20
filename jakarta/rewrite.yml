@@ -67,21 +67,29 @@ recipeList:
   - org.openrewrite.maven.ChangePropertyValue:
       key: hibernate-reactive.version
       newValue: 1.1.5.Beta1
+  - org.openrewrite.maven.ChangePropertyValue:
+      key: hibernate-orm.version
+      newValue: 6.0.0.Final
   - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-core
-      newGroupId: org.hibernate
-      newArtifactId: hibernate-core-jakarta
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-core
+  - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
+      oldGroupId: org.hibernate
+      oldArtifactId: hibernate-graalvm
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-graalvm
   - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-envers
-      newGroupId: org.hibernate
-      newArtifactId: hibernate-envers-jakarta
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-envers
   - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-jpamodelgen
-      newGroupId: org.hibernate
-      newArtifactId: hibernate-jpamodelgen-jakarta
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-jpamodelgen
   - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate.search
       oldArtifactId: hibernate-search-mapper-orm-coordination-outbox-polling
@@ -312,18 +320,23 @@ recipeList:
   - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-core
-      newGroupId: org.hibernate
-      newArtifactId: hibernate-core-jakarta
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-core
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: org.hibernate
+      oldArtifactId: hibernate-graalvm
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-graalvm
   - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-envers
-      newGroupId: org.hibernate
-      newArtifactId: hibernate-envers-jakarta
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-envers
   - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-jpamodelgen
-      newGroupId: org.hibernate
-      newArtifactId: hibernate-jpamodelgen-jakarta
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-jpamodelgen
   - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
       oldGroupId: io.agroal
       oldArtifactId: agroal-narayana
