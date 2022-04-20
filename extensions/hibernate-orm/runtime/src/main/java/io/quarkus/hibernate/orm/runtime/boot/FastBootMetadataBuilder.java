@@ -10,7 +10,6 @@ import static org.hibernate.cfg.AvailableSettings.PASS;
 import static org.hibernate.cfg.AvailableSettings.TRANSACTION_COORDINATOR_STRATEGY;
 import static org.hibernate.cfg.AvailableSettings.URL;
 import static org.hibernate.cfg.AvailableSettings.USER;
-import static org.hibernate.cfg.AvailableSettings.WRAP_RESULT_SETS;
 import static org.hibernate.cfg.AvailableSettings.XML_MAPPING_ENABLED;
 import static org.hibernate.internal.HEMLogging.messageLogger;
 import static org.hibernate.jpa.AvailableSettings.CLASS_CACHE_PREFIX;
@@ -95,6 +94,7 @@ public class FastBootMetadataBuilder {
 	 */
 	@Deprecated private static final String JACC_PREFIX = "hibernate.jacc";
 	@Deprecated private static final String JACC_ENABLED = "hibernate.jacc.enabled";
+	@Deprecated private static final String WRAP_RESULT_SETS = "hibernate.jdbc.wrap_result_sets";
 
     private static final EntityManagerMessageLogger LOG = messageLogger(FastBootMetadataBuilder.class);
 
@@ -271,9 +271,8 @@ public class FastBootMetadataBuilder {
                 PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_BEFORE_TRANSACTION_COMPLETION);
 
         if (readBooleanConfigurationValue(cfg, WRAP_RESULT_SETS)) {
-            LOG.warn("Wrapping result sets is not supported. Setting " + WRAP_RESULT_SETS + " to false.");
+            LOG.warn("Wrapping result sets is no longer supported by Hibernate ORM. Setting " + WRAP_RESULT_SETS + " is being ignored.");
         }
-        cfg.put(WRAP_RESULT_SETS, "false");
 
         // XML mapping support can be costly, so we only enable it when XML mappings are actually used
         // or when integrations (e.g. Envers) need it.
