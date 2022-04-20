@@ -12,9 +12,9 @@ import static org.hibernate.cfg.AvailableSettings.URL;
 import static org.hibernate.cfg.AvailableSettings.USER;
 import static org.hibernate.cfg.AvailableSettings.XML_MAPPING_ENABLED;
 import static org.hibernate.internal.HEMLogging.messageLogger;
-import static org.hibernate.jpa.AvailableSettings.CLASS_CACHE_PREFIX;
-import static org.hibernate.jpa.AvailableSettings.COLLECTION_CACHE_PREFIX;
-import static org.hibernate.jpa.AvailableSettings.PERSISTENCE_UNIT_NAME;
+import static org.hibernate.cfg.AvailableSettings.CLASS_CACHE_PREFIX;
+import static org.hibernate.cfg.AvailableSettings.COLLECTION_CACHE_PREFIX;
+import static org.hibernate.cfg.AvailableSettings.PERSISTENCE_UNIT_NAME;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
