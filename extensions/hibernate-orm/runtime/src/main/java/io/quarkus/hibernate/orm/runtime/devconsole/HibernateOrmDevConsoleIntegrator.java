@@ -5,7 +5,7 @@ import static org.hibernate.cfg.AvailableSettings.HBM2DDL_IMPORT_FILES;
 import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.integrator.spi.Integrator;
-import org.hibernate.jpa.AvailableSettings;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 public class HibernateOrmDevConsoleIntegrator implements Integrator {

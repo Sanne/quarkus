@@ -109,7 +109,7 @@ public final class ProxyDefinitions {
                     + "') as it's final. Your application might perform better if we're allowed to extend it.");
             return null;
         }
-        final Set<Class> proxyInterfaces = ProxyFactoryHelper.extractProxyInterfaces(persistentClass, entityName);
+        final Set<Class<?>> proxyInterfaces = ProxyFactoryHelper.extractProxyInterfaces(persistentClass, entityName);
         PreGeneratedProxies.ProxyClassDetailsHolder preProxy = preGeneratedProxies.getProxies()
                 .get(persistentClass.getClassName());
         Class<?> preGeneratedProxy = null;
@@ -155,11 +155,11 @@ public final class ProxyDefinitions {
         }
     }
 
-    private static Class[] toArray(final Set<Class> interfaces) {
-        if (interfaces == null) {
+    private static Class[] toArray(final Set<Class<?>> proxyInterfaces) {
+        if (proxyInterfaces == null) {
             return ArrayHelper.EMPTY_CLASS_ARRAY;
         }
-        return interfaces.toArray(new Class[interfaces.size()]);
+        return proxyInterfaces.toArray(new Class[proxyInterfaces.size()]);
     }
 
     public ProxyClassDetailsHolder getProxyForClass(Class persistentClass) {
