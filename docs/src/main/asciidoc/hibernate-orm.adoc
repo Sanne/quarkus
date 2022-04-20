@@ -767,16 +767,6 @@ For example, if two JARs include a `META-INF/orm.xml` file (with the exact same 
 then the mapping file path `META-INF/orm.xml` can only be referenced from a `persistence.xml`
 **in the same JAR as the `META-INF/orm.xml` file**.
 
-JMX::
-Management beans are not working in GraalVM native images;
-therefore Hibernate's capability to register statistics and management operations with the JMX bean is disabled when compiling into a native image.
-This limitation is likely permanent, as it's not a goal for native images
-to implement support for JMX. All such metrics can be accessed in other ways.
-
-JACC Integration::
-Hibernate ORM's capability to integrate with JACC is disabled when building GraalVM native images,
-as JACC is not available - nor useful - in native mode.
-
 Binding the Session to ThreadLocal context::
 It is not possible to use the `ThreadLocalSessionContext` helper of Hibernate ORM as support for it is not implemented.
 Since Quarkus provides out of the box support for CDI, we believe using injection or programmatic CDI lookup to be a better approach.
