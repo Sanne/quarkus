@@ -174,9 +174,6 @@ public class PreconfiguredServiceRegistryBuilder {
         // Custom one!
         serviceInitiators.add(QuarkusJndiServiceInitiator.INSTANCE);
 
-        // Custom one!
-        serviceInitiators.add(DisabledJMXInitiator.INSTANCE);
-
         serviceInitiators.add(PersisterClassResolverInitiator.INSTANCE);
         serviceInitiators.add(PersisterFactoryInitiator.INSTANCE);
 
