@@ -1,8 +1,6 @@
 package io.quarkus.hibernate.orm.runtime.boot;
 
 import static org.hibernate.cfg.AvailableSettings.DRIVER;
-import static org.hibernate.cfg.AvailableSettings.JACC_ENABLED;
-import static org.hibernate.cfg.AvailableSettings.JACC_PREFIX;
 import static org.hibernate.cfg.AvailableSettings.JPA_JDBC_DRIVER;
 import static org.hibernate.cfg.AvailableSettings.JPA_JDBC_PASSWORD;
 import static org.hibernate.cfg.AvailableSettings.JPA_JDBC_URL;
@@ -91,6 +89,12 @@ import io.quarkus.hibernate.orm.runtime.tenant.HibernateMultiTenantConnectionPro
  * is created, which configuration properties are supportable, custom overrides, etc...
  */
 public class FastBootMetadataBuilder {
+	
+	/**
+	 * Old deprecated constants:
+	 */
+	@Deprecated private static final String JACC_PREFIX = "hibernate.jacc";
+	@Deprecated private static final String JACC_ENABLED = "hibernate.jacc.enabled";
 
     private static final EntityManagerMessageLogger LOG = messageLogger(FastBootMetadataBuilder.class);
 
@@ -300,8 +304,7 @@ public class FastBootMetadataBuilder {
 
         // Note: this one is not a boolean, just having the property enables it
         if (cfg.containsKey(JACC_ENABLED)) {
-            LOG.warn("JACC is not supported. Disabling it.");
-            cfg.remove(JACC_ENABLED);
+            LOG.warn("JACC integration is no longer supported by Hibernate ORM. Option ignored.");
         }
 
         // here we are going to iterate the merged config settings looking for:
@@ -324,7 +327,7 @@ public class FastBootMetadataBuilder {
 
                 if (keyString.startsWith(JACC_PREFIX)) {
                     LOG.warn(
-                            "Found JACC permission grant [%s] in properties, but JACC is not compatible with the FastBootMetadataBuilder; ignoring!");
+                            "Found JACC permission grant [%s] in properties, but JACC is no longer supported by Hibernate ORM: ignoring!");
                 } else if (keyString.startsWith(CLASS_CACHE_PREFIX)) {
                     mergedSettings.addCacheRegionDefinition(
                             parseCacheRegionDefinitionEntry(keyString.substring(CLASS_CACHE_PREFIX.length() + 1),
