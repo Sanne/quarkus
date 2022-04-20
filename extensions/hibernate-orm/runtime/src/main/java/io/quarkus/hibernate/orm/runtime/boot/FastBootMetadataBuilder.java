@@ -90,11 +90,12 @@ import io.quarkus.hibernate.orm.runtime.tenant.HibernateMultiTenantConnectionPro
 public class FastBootMetadataBuilder {
 	
 	/**
-	 * Old deprecated constants:
+	 * Old deprecated constants; we keep these around only to issue appropriate warnings.
 	 */
 	@Deprecated private static final String JACC_PREFIX = "hibernate.jacc";
 	@Deprecated private static final String JACC_ENABLED = "hibernate.jacc.enabled";
 	@Deprecated private static final String WRAP_RESULT_SETS = "hibernate.jdbc.wrap_result_sets";
+	@Deprecated private static final String ALLOW_ENHANCEMENT_AS_PROXY = "hibernate.bytecode.allow_enhancement_as_proxy";
 
     private static final EntityManagerMessageLogger LOG = messageLogger(FastBootMetadataBuilder.class);
 
@@ -246,9 +247,9 @@ public class FastBootMetadataBuilder {
                     Boolean.getBoolean(AvailableSettings.ALLOW_UPDATE_OUTSIDE_TRANSACTION));
         }
 
-        //Enable the new Enhanced Proxies capability (unless it was specifically disabled):
-        if (!cfg.containsKey(AvailableSettings.ALLOW_ENHANCEMENT_AS_PROXY)) {
-            cfg.put(AvailableSettings.ALLOW_ENHANCEMENT_AS_PROXY, Boolean.TRUE.toString());
+        //Check for presence of configuration keys relating to Enhanced Proxies (can no longer be disabled):
+        if (!cfg.containsKey(ALLOW_ENHANCEMENT_AS_PROXY)) {
+            LOG.warn("Setting '" + ALLOW_ENHANCEMENT_AS_PROXY + "' is no longer compatible with Hibernate ORM; this option will be ignored.");
         }
         //Always Order batch updates as it prevents contention on the data (unless it was disabled)
         if (!cfg.containsKey(AvailableSettings.ORDER_UPDATES)) {
