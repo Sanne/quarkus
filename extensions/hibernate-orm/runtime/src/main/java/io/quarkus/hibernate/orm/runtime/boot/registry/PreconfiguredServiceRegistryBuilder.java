@@ -52,8 +52,8 @@ import io.quarkus.hibernate.orm.runtime.service.QuarkusStaticDialectFactoryIniti
 public class PreconfiguredServiceRegistryBuilder {
 
     private final Map configurationValues = new HashMap();
-    private final List<StandardServiceInitiator> initiators;
-    private final List<ProvidedService> providedServices = new ArrayList<ProvidedService>();
+    private final List<StandardServiceInitiator<?>> initiators;
+    private final List<ProvidedService<?>> providedServices = new ArrayList<ProvidedService<?>>();
     private final Collection<Integrator> integrators;
     private final StandardServiceRegistryImpl destroyedRegistry;
 
@@ -140,8 +140,8 @@ public class PreconfiguredServiceRegistryBuilder {
      *
      * @return
      */
-    private static List<StandardServiceInitiator> buildQuarkusServiceInitiatorList(RecordedState rs) {
-        final ArrayList<StandardServiceInitiator> serviceInitiators = new ArrayList<StandardServiceInitiator>();
+    private static List<StandardServiceInitiator<?>> buildQuarkusServiceInitiatorList(RecordedState rs) {
+        final ArrayList<StandardServiceInitiator<?>> serviceInitiators = new ArrayList<StandardServiceInitiator<?>>();
 
         //Enforces no bytecode enhancement will happen at runtime:
         serviceInitiators.add(DisabledBytecodeProviderInitiator.INSTANCE);
