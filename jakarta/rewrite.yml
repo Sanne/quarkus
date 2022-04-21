@@ -69,7 +69,7 @@ recipeList:
       newValue: 1.1.5.Beta1
   - org.openrewrite.maven.ChangePropertyValue:
       key: hibernate-orm.version
-      newValue: 6.0.0.Final
+      newValue: 6.0.1-SNAPSHOT
   - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
       oldGroupId: org.hibernate
       oldArtifactId: hibernate-core
