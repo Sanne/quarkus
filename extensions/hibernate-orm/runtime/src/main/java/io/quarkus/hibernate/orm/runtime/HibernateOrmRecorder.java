@@ -15,6 +15,7 @@ import org.hibernate.MultiTenancyStrategy;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.archive.scan.spi.Scanner;
+import org.hibernate.engine.spi.SessionLazyDelegator;
 import org.hibernate.integrator.spi.Integrator;
 import org.jboss.logging.Logger;
 
@@ -123,14 +124,12 @@ public class HibernateOrmRecorder {
             public Session get() {
                 TransactionSessions transactionSessions = Arc.container()
                         .instance(TransactionSessions.class).get();
-                ForwardingSession session = new ForwardingSession() {
-
-                    @Override
-                    protected Session delegate() {
-                        return transactionSessions.getSession(persistenceUnitName);
-                    }
-                };
-                return session;
+                return new SessionLazyDelegator( new Supplier<Session>() {
+                	@Override
+                    public Session get() {
+                		return transactionSessions.getSession(persistenceUnitName);
+                	}
+                } );
             }
         };
     }
