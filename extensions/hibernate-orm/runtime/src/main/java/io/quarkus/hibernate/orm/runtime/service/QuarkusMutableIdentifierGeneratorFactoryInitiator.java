@@ -17,7 +17,8 @@ import org.hibernate.service.spi.ServiceRegistryImplementor;
 public final class QuarkusMutableIdentifierGeneratorFactoryInitiator
         implements StandardServiceInitiator<MutableIdentifierGeneratorFactory> {
 
-    private final MutableIdentifierGeneratorFactory sfScopedSingleton = new QuarkusMutableIdentifierGeneratorFactory();
+    private final MutableIdentifierGeneratorFactory sfScopedSingleton = new QuarkusMutableIdentifierGeneratorFactory(
+            new QuarkusSimplifiedIdentifierGeneratorFactory());
 
     @Override
     public MutableIdentifierGeneratorFactory initiateService(final Map configurationValues,

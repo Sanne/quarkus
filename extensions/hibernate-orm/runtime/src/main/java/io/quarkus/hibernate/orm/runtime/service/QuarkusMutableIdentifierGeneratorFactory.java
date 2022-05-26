@@ -26,8 +26,12 @@ import org.hibernate.type.Type;
 public final class QuarkusMutableIdentifierGeneratorFactory
         implements MutableIdentifierGeneratorFactory, Serializable, ServiceRegistryAwareService {
 
-    private final QuarkusSimplifiedIdentifierGeneratorFactory original = new QuarkusSimplifiedIdentifierGeneratorFactory();
+    private final MutableIdentifierGeneratorFactory original;
     private final ConcurrentHashMap<String, Class<? extends IdentifierGenerator>> typeCache = new ConcurrentHashMap<>();
+
+    public QuarkusMutableIdentifierGeneratorFactory(MutableIdentifierGeneratorFactory original) {
+        this.original = original;
+    }
 
     @Override
     public void register(final String strategy, final Class generatorClass) {
