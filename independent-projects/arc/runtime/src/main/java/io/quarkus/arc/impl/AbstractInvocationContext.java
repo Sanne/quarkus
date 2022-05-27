@@ -6,6 +6,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
-abstract class AbstractInvocationContext implements ArcInvocationContext, Supplier<Map<String, Object>> {
+abstract class AbstractInvocationContext implements ArcInvocationContext {
 
     private static final Object[] EMPTY_PARAMS = new Object[0];
 
@@ -23,18 +24,17 @@ abstract class AbstractInvocationContext implements ArcInvocationContext, Suppli
     protected final List<InterceptorInvocation> chain;
     protected Object target;
     protected Object[] parameters;
-    // The map is initialized lazily but we need to use a holder so that all interceptors in the chain can access the same data
-    protected LazyValue<Map<String, Object>> contextData;
+    protected Map<String, Object> contextData;
 
     protected AbstractInvocationContext(Object target, Method method,
             Constructor<?> constructor,
-            Object[] parameters, LazyValue<Map<String, Object>> contextData,
+            Object[] parameters, Map<String, Object> contextData,
             Set<Annotation> interceptorBindings, List<InterceptorInvocation> chain) {
         this.target = target;
         this.method = method;
         this.constructor = constructor;
         this.parameters = parameters != null ? parameters : EMPTY_PARAMS;
-        this.contextData = contextData != null ? contextData : new LazyValue<>(this);
+        this.contextData = contextData != null ? contextData : new ContextData();
         this.interceptorBindings = interceptorBindings;
         this.chain = chain;
     }
@@ -125,11 +125,84 @@ abstract class AbstractInvocationContext implements ArcInvocationContext, Suppli
         return constructor;
     }
 
-    @Override
-    public Map<String, Object> get() {
-        Map<String, Object> result = new HashMap<String, Object>();
-        result.put(ArcInvocationContext.KEY_INTERCEPTOR_BINDINGS, interceptorBindings);
-        return result;
+    private class ContextData implements Map<String, Object> {
+
+		@Override
+		public void clear() {
+			throw new UnsupportedOperationException("Not allowed to clear the context data map");
+		}
+
+		@Override
+		public boolean containsKey(Object key) {
+			if (ArcInvocationContext.KEY_INTERCEPTOR_BINDINGS.equals(key)) {
+				return true;
+			}
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean containsValue(Object value) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public Set entrySet() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object get(Object key) {
+			if (ArcInvocationContext.KEY_INTERCEPTOR_BINDINGS.equals(key)) {
+				return AbstractInvocationContext.this.interceptorBindings;
+			}
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return false;
+		}
+
+		@Override
+		public Set keySet() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void putAll(Map m) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public Object remove(Object key) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int size() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public Collection values() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object put(String arg0, Object arg1) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+    	
     }
 
 }

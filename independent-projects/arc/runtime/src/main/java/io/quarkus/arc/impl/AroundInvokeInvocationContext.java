@@ -26,7 +26,7 @@ class AroundInvokeInvocationContext extends AbstractInvocationContext {
     private final Function<InvocationContext, Object> aroundInvokeForward;
 
     AroundInvokeInvocationContext(Object target, Method method, Object[] parameters,
-            LazyValue<Map<String, Object>> contextData, Set<Annotation> interceptorBindings, int position,
+            Map<String, Object> contextData, Set<Annotation> interceptorBindings, int position,
             List<InterceptorInvocation> chain, Function<InvocationContext, Object> aroundInvokeForward) {
         super(target, method, null, parameters, contextData, interceptorBindings, chain);
         this.position = position;
