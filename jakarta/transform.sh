@@ -118,7 +118,7 @@ convert_service_file () {
 rewrite_module () {
   local modulePath="$1"
   echo "  - Rewriting $modulePath"
-  ./mvnw -B rewrite:run -f "${modulePath}/pom.xml" -N -Djakarta-rewrite
+  ./mvnw -B rewrite:run -f "${modulePath}/pom.xml" -N -Djakarta-rewrite -Denforcer.skip
   echo "    > Rewriting done"
 }
 
@@ -126,7 +126,7 @@ rewrite_module () {
 rewrite_module_cleanup () {
   local modulePath="$1"
   echo "  - Rewriting $modulePath"
-  ./mvnw -B rewrite:run -f "${modulePath}/pom.xml" -N -Djakarta-rewrite-cleanup
+  ./mvnw -B rewrite:run -f "${modulePath}/pom.xml" -N -Djakarta-rewrite-cleanup -Denforcer.skip
   echo "    > Rewriting done"
 }
 
@@ -152,7 +152,7 @@ build_module () {
   elif [ "${REWRITE_NO_TESTS-false}" != "true" ]; then
     ./mvnw -B clean install -f "$pomPath"
   else
-    ./mvnw -B clean install -f "$pomPath" -DskipTests -DskipITs
+    ./mvnw -B clean install -f "$pomPath" -DskipTests -DskipITs -Denforcer.skip
   fi
   echo "  - Installed newly built $pomPath"
 }
@@ -193,7 +193,7 @@ clean_maven_repository
 clean_project
 
 ## let's build what's required to be able to run the rewrite
-./mvnw -B -pl :quarkus-bootstrap-maven-plugin -pl :quarkus-enforcer-rules -pl :quarkus-maven-plugin -pl :quarkus-bom-test -am clean install -DskipTests -DskipITs -Dinvoker.skip
+./mvnw -B -pl :quarkus-bootstrap-maven-plugin -pl :quarkus-enforcer-rules -pl :quarkus-maven-plugin -pl :quarkus-bom-test -am clean install -DskipTests -DskipITs -Dinvoker.skip -Denforcer.skip
 
 ## we cannot rewrite some of the modules for various reasons but we rewrite most of them
 ./mvnw -B -e rewrite:run -Dtcks -Denforcer.skip -Dprotoc.skip -Dmaven.main.skip -Dmaven.test.skip -Dforbiddenapis.skip -Dinvoker.skip -Dquarkus.generate-code.skip -Dquarkus.build.skip -DskipExtensionValidation -DskipCodestartValidation -Pbom-descriptor-json-hollow -pl '!:io.quarkus.gradle.plugin' -pl '!:io.quarkus.extension.gradle.plugin' -pl '!:quarkus-integration-test-gradle-plugin' -pl '!:quarkus-documentation' -Drewrite.pomCacheEnabled=false -Djakarta-rewrite
