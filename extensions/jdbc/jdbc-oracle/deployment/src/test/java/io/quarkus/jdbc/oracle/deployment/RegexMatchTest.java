@@ -19,10 +19,11 @@ public class RegexMatchTest {
 
     @Test
     public void jarRegexIsMatching() {
-        final String EXAMPLE_CLASSPATH = "/home/sanne/sources/quarkus/integration-tests/jpa-oracle/target/quarkus-integration-test-jpa-oracle-999-SNAPSHOT-native-image-source-jar/lib/com.oracle.database.jdbc.ojdbc11-21.3.0.0.jar";
+        final String EXAMPLE_LINUX_PATH = "/home/sanne/sources/quarkus/integration-tests/jpa-oracle/target/quarkus-integration-test-jpa-oracle-999-SNAPSHOT-native-image-source-jar/lib/com.oracle.database.jdbc.ojdbc11-21.3.0.0.jar";
+        final String EXAMPLE_WINDOWS_JAR = "C:\\Program Files\\quarkus\\libs\\com.oracle.database.jdbc.ojdbc11-21.3.0.0.jar";
         final Pattern pattern = Pattern.compile(OracleMetadataOverrides.DRIVER_JAR_MATCH_REGEX);
-        final Matcher matcher = pattern.matcher(EXAMPLE_CLASSPATH);
-        Assert.assertTrue(matcher.find());
+        Assert.assertTrue(pattern.matcher(EXAMPLE_LINUX_PATH).find());
+        Assert.assertTrue(pattern.matcher(EXAMPLE_WINDOWS_JAR).find());
     }
 
     @Test
