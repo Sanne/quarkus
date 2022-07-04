@@ -1,0 +1,42 @@
+---
+type: specs.openrewrite.org/v1beta/style
+name: io.quarkus.style.maven
+styleConfigs:
+  - org.openrewrite.xml.style.TabsAndIndentsStyle:
+      useTabCharacter: false
+      tabSize: 1
+      indentSize: 4
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: io.quarkus.hibernate-orm-6
+displayName: Update a Jakarta transformed tree from ORM v5/Jakarta to Hibernate ORM 6 (which is Jakarta native)
+recipeList:
+  - org.openrewrite.maven.ChangePropertyValue:
+      key: version.jpa
+      newValue: 3.0.0
+  - org.openrewrite.maven.ChangePropertyValue:
+      key: jakarta.persistence-api.version
+      newValue: 3.0.0
+  - org.openrewrite.maven.ChangePropertyValue:
+      key: hibernate-orm.version
+      newValue: 6.1.1.Final
+  - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
+      oldGroupId: org.hibernate
+      oldArtifactId: hibernate-core
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-core
+  - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
+      oldGroupId: org.hibernate
+      oldArtifactId: hibernate-graalvm
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-graalvm
+  - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
+      oldGroupId: org.hibernate
+      oldArtifactId: hibernate-envers
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-envers
+  - org.openrewrite.maven.ChangeManagedDependencyGroupIdAndArtifactId:
+      oldGroupId: org.hibernate
+      oldArtifactId: hibernate-jpamodelgen
+      newGroupId: org.hibernate.orm
+      newArtifactId: hibernate-jpamodelgen
