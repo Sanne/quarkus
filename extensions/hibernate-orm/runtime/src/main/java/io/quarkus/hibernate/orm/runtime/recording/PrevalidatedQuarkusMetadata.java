@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
@@ -13,25 +14,23 @@ import org.hibernate.boot.internal.SessionFactoryOptionsBuilder;
 import org.hibernate.boot.model.IdentifierGeneratorDefinition;
 import org.hibernate.boot.model.TypeDefinition;
 import org.hibernate.boot.model.relational.Database;
+import org.hibernate.boot.query.NamedHqlQueryDefinition;
+import org.hibernate.boot.query.NamedNativeQueryDefinition;
+import org.hibernate.boot.query.NamedProcedureCallDefinition;
+import org.hibernate.boot.query.NamedResultSetMappingDescriptor;
 import org.hibernate.boot.spi.MetadataBuildingOptions;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cfg.annotations.NamedEntityGraphDefinition;
-import org.hibernate.cfg.annotations.NamedProcedureCallDefinition;
-import org.hibernate.dialect.function.SQLFunction;
-import org.hibernate.engine.ResultSetMappingDefinition;
 import org.hibernate.engine.spi.FilterDefinition;
-import org.hibernate.engine.spi.NamedQueryDefinition;
-import org.hibernate.engine.spi.NamedSQLQueryDefinition;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.id.factory.IdentifierGeneratorFactory;
-import org.hibernate.internal.SessionFactoryImpl;
+import org.hibernate.mapping.Component;
 import org.hibernate.mapping.FetchProfile;
 import org.hibernate.mapping.MappedSuperclass;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Table;
-import org.hibernate.query.spi.NamedQueryRepository;
+import org.hibernate.query.named.NamedObjectRepository;
+import org.hibernate.query.sqm.function.SqmFunctionDescriptor;
 import org.hibernate.type.Type;
-import org.hibernate.type.TypeResolver;
 import org.hibernate.type.spi.TypeConfiguration;
 
 /**
@@ -68,9 +67,10 @@ public final class PrevalidatedQuarkusMetadata implements MetadataImplementor {
                 metadata.getBootstrapContext());
         // This would normally be done by the constructor of SessionFactoryBuilderImpl,
         // but we don't use a builder to create the session factory, for some reason.
-        Map<String, SQLFunction> sqlFunctions = metadata.getSqlFunctionMap();
+
+        Map<String, SqmFunctionDescriptor> sqlFunctions = metadata.getSqlFunctionMap();
         if (sqlFunctions != null) {
-            for (Map.Entry<String, SQLFunction> entry : sqlFunctions.entrySet()) {
+            for (Map.Entry<String, SqmFunctionDescriptor> entry : sqlFunctions.entrySet()) {
                 builder.applySqlFunction(entry.getKey(), entry.getValue());
             }
         }
@@ -134,41 +134,6 @@ public final class PrevalidatedQuarkusMetadata implements MetadataImplementor {
     }
 
     @Override
-    public NamedQueryDefinition getNamedQueryDefinition(final String name) {
-        return metadata.getNamedQueryDefinition(name);
-    }
-
-    @Override
-    public Collection<NamedQueryDefinition> getNamedQueryDefinitions() {
-        return metadata.getNamedQueryDefinitions();
-    }
-
-    @Override
-    public NamedSQLQueryDefinition getNamedNativeQueryDefinition(final String name) {
-        return metadata.getNamedNativeQueryDefinition(name);
-    }
-
-    @Override
-    public Collection<NamedSQLQueryDefinition> getNamedNativeQueryDefinitions() {
-        return metadata.getNamedNativeQueryDefinitions();
-    }
-
-    @Override
-    public Collection<NamedProcedureCallDefinition> getNamedProcedureCallDefinitions() {
-        return metadata.getNamedProcedureCallDefinitions();
-    }
-
-    @Override
-    public ResultSetMappingDefinition getResultSetMapping(final String name) {
-        return metadata.getResultSetMapping(name);
-    }
-
-    @Override
-    public Map<String, ResultSetMappingDefinition> getResultSetMappingDefinitions() {
-        return metadata.getResultSetMappingDefinitions();
-    }
-
-    @Override
     public TypeDefinition getTypeDefinition(final String typeName) {
         return metadata.getTypeDefinition(typeName);
     }
@@ -214,17 +179,11 @@ public final class PrevalidatedQuarkusMetadata implements MetadataImplementor {
     }
 
     @Override
-    public Map<String, SQLFunction> getSqlFunctionMap() {
+    public Map<String, SqmFunctionDescriptor> getSqlFunctionMap() {
         return metadata.getSqlFunctionMap();
     }
 
     //All methods from org.hibernate.engine.spi.Mapping, the parent of Metadata:
-
-    @Override
-    @Deprecated
-    public IdentifierGeneratorFactory getIdentifierGeneratorFactory() {
-        return metadata.getIdentifierGeneratorFactory();
-    }
 
     @Override
     public Type getIdentifierType(final String className) throws MappingException {
@@ -254,16 +213,6 @@ public final class PrevalidatedQuarkusMetadata implements MetadataImplementor {
     }
 
     @Override
-    public TypeResolver getTypeResolver() {
-        return metadata.getTypeResolver();
-    }
-
-    @Override
-    public NamedQueryRepository buildNamedQueryRepository(SessionFactoryImpl sessionFactory) {
-        return metadata.buildNamedQueryRepository(sessionFactory);
-    }
-
-    @Override
     public Set<MappedSuperclass> getMappedSuperclassMappingsCopy() {
         return metadata.getMappedSuperclassMappingsCopy();
     }
@@ -271,6 +220,72 @@ public final class PrevalidatedQuarkusMetadata implements MetadataImplementor {
     @Override
     public void initSessionFactory(SessionFactoryImplementor sessionFactoryImplementor) {
         metadata.initSessionFactory(sessionFactoryImplementor);
+    }
+
+    @Override
+    public NamedHqlQueryDefinition getNamedHqlQueryMapping(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void visitNamedHqlQueryDefinitions(Consumer<NamedHqlQueryDefinition> definitionConsumer) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public NamedNativeQueryDefinition getNamedNativeQueryMapping(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void visitNamedNativeQueryDefinitions(Consumer<NamedNativeQueryDefinition> definitionConsumer) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public NamedProcedureCallDefinition getNamedProcedureCallMapping(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void visitNamedProcedureCallDefinition(Consumer<NamedProcedureCallDefinition> definitionConsumer) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public NamedResultSetMappingDescriptor getResultSetMapping(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void visitNamedResultSetMappingDefinition(Consumer<NamedResultSetMappingDescriptor> definitionConsumer) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Set<String> getContributors() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public NamedObjectRepository buildNamedQueryRepository(SessionFactoryImplementor sessionFactory) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void visitRegisteredComponents(Consumer<Component> consumer) {
+        // TODO Auto-generated method stub
+
     }
 
 }
