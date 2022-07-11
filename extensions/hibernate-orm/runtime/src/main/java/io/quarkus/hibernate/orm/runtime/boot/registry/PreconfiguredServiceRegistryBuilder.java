@@ -187,7 +187,7 @@ public class PreconfiguredServiceRegistryBuilder {
         serviceInitiators.add(new QuarkusStaticDialectFactoryInitiator(rs.getDialect()));
 
         // Non-default implementation: optimised for lack of JMX management
-        serviceInitiators.add(UnmodifiableBatchBuilderInitiator.INSTANCE);
+        serviceInitiators.add(UnmodifiableBatchBuilderInitiator.INSTANCE);//TODO no longer needed?
 
         serviceInitiators.add(JdbcServicesInitiator.INSTANCE);
         serviceInitiators.add(RefCursorSupportInitiator.INSTANCE);
