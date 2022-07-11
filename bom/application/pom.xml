@@ -4880,8 +4880,8 @@
                 <version>${hibernate-validator.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate.orm</groupId>
-                <artifactId>hibernate-core</artifactId>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core-jakarta</artifactId>
                 <version>${hibernate-orm.version}</version>
                 <exclusions>
                     <exclusion>
@@ -4891,18 +4891,18 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.hibernate.orm</groupId>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-graalvm</artifactId>
                 <version>${hibernate-orm.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate.orm</groupId>
-                <artifactId>hibernate-envers</artifactId>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-envers-jakarta</artifactId>
                 <version>${hibernate-orm.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate.orm</groupId>
-                <artifactId>hibernate-jpamodelgen</artifactId>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-jpamodelgen-jakarta</artifactId>
                 <version>${hibernate-orm.version}</version>
             </dependency>
             <dependency>
@@ -4914,11 +4914,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>quarkus-local-cache-jakarta</artifactId>
                 <version>${hibernate-quarkus-local-cache.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate.common</groupId>
-                <artifactId>hibernate-commons-annotations</artifactId>
-                <version>${hibernate-commons-annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.search</groupId>
