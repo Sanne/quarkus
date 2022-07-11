@@ -8,7 +8,7 @@ shopt -s failglob
 # Make sure WIP changes in parent pom are installed
 #./mvnw -B install -pl :quarkus-parent 
 
-./mvnw -B -e rewrite:run -Denforcer.skip -Dprotoc.skip -Dmaven.main.skip -Dmaven.test.skip -Dforbiddenapis.skip -Dinvoker.skip -Dquarkus.generate-code.skip -Dquarkus.build.skip -DskipExtensionValidation -DskipCodestartValidation -pl ':quarkus-bom',':quarkus-hibernate-orm' -Drewrite.pomCacheEnabled=false -Dhibernate6-rewrite
+./mvnw -B -e rewrite:run -Denforcer.skip -Dprotoc.skip -Dmaven.main.skip -Dmaven.test.skip -Dforbiddenapis.skip -Dinvoker.skip -Dquarkus.generate-code.skip -Dquarkus.build.skip -DskipExtensionValidation -DskipCodestartValidation -pl ':quarkus-bom',':quarkus-hibernate-orm',':quarkus-hibernate-envers',':quarkus-hibernate-envers',':quarkus-hibernate-orm-panache',':quarkus-hibernate-orm-panache-kotlin',':quarkus-hibernate-reactive-panache' -Drewrite.pomCacheEnabled=false -Dhibernate6-rewrite
 
 
 
