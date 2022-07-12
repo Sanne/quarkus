@@ -4,12 +4,15 @@ import java.io.Serializable;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.persistence.GenerationType;
+
 import org.hibernate.dialect.Dialect;
 import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.id.factory.spi.MutableIdentifierGeneratorFactory;
-import org.hibernate.service.spi.ServiceRegistryAwareService;
-import org.hibernate.service.spi.ServiceRegistryImplementor;
+import org.hibernate.id.factory.IdentifierGeneratorFactory;
+import org.hibernate.id.factory.spi.GeneratorDefinitionResolver;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
+import org.hibernate.type.descriptor.java.JavaType;
 
 /**
  * Wraps the default DefaultIdentifierGeneratorFactory so to make sure we store the Class references
@@ -24,26 +27,21 @@ import org.hibernate.type.Type;
  * just watching for these will provide the full list of Class instances we need to keep.
  */
 public final class QuarkusMutableIdentifierGeneratorFactory
-        implements MutableIdentifierGeneratorFactory, Serializable, ServiceRegistryAwareService {
+        implements IdentifierGeneratorFactory, Serializable {
 
-    private final QuarkusSimplifiedIdentifierGeneratorFactory original = new QuarkusSimplifiedIdentifierGeneratorFactory();
+    //FIXME since this class is no longer a service, how do we override the default implementation?
+    //[This is currently not being used]
+
+    private final QuarkusSimplifiedIdentifierGeneratorFactory original;
     private final ConcurrentHashMap<String, Class<? extends IdentifierGenerator>> typeCache = new ConcurrentHashMap<>();
 
-    @Override
-    public void register(final String strategy, final Class generatorClass) {
-        original.register(strategy, generatorClass);
-        storeCache(strategy, generatorClass);
+    public QuarkusMutableIdentifierGeneratorFactory(ServiceRegistry serviceRegistry) {
+        this.original = new QuarkusSimplifiedIdentifierGeneratorFactory(serviceRegistry);
     }
 
     @Override
     public Dialect getDialect() {
         return original.getDialect();
-    }
-
-    @Override
-    public void setDialect(final Dialect dialect) {
-        //currently a no-op anyway..?
-        original.setDialect(dialect);
     }
 
     @Override
@@ -75,7 +73,12 @@ public final class QuarkusMutableIdentifierGeneratorFactory
     }
 
     @Override
-    public void injectServices(final ServiceRegistryImplementor serviceRegistry) {
-        original.injectServices(serviceRegistry);
+    public IdentifierGenerator createIdentifierGenerator(GenerationType generationType,
+            String generatedValueGeneratorName, String generatorName, JavaType<?> javaType, Properties config,
+            GeneratorDefinitionResolver definitionResolver) {
+        // FIXME this is going to bypass the capturing of the generator class: can we deal with it?
+        return original.createIdentifierGenerator(generationType, generatedValueGeneratorName, generatorName, javaType, config,
+                definitionResolver);
     }
+
 }
