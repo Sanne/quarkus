@@ -1,27 +1,16 @@
 package io.quarkus.hibernate.orm.runtime.devconsole;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-import org.hibernate.LockOptions;
 import org.hibernate.boot.Metadata;
-import org.hibernate.engine.spi.NamedQueryDefinition;
-import org.hibernate.engine.spi.NamedSQLQueryDefinition;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.schema.TargetType;
-import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToWriter;
-import org.hibernate.tool.schema.spi.ScriptTargetOutput;
-import org.hibernate.tool.schema.spi.TargetDescriptor;
 
 import io.quarkus.hibernate.orm.runtime.PersistenceUnitUtil;
 
@@ -36,18 +25,18 @@ public class HibernateOrmDevConsoleInfoSupplier implements Supplier<HibernateOrm
             managedEntities.add(new EntityInfo(entityBinding.getClassName(), entityBinding.getTable().getName()));
         }
 
-        List<QueryInfo> namedQueries = new ArrayList<>();
-        for (NamedQueryDefinition queryDefinition : metadata.getNamedQueryDefinitions()) {
-            namedQueries.add(new QueryInfo(queryDefinition));
-        }
+        final List<QueryInfo> namedQueries = new ArrayList<>();
+        //        for (NamedQueryDefinition queryDefinition : metadata.getNamedQueryDefinitions()) {
+        //            namedQueries.add(new QueryInfo(queryDefinition));
+        //        }
 
-        List<QueryInfo> namedNativeQueries = new ArrayList<>();
-        for (NamedSQLQueryDefinition staticQueryDefinition : metadata.getNamedNativeQueryDefinitions()) {
-            namedNativeQueries.add(new QueryInfo(staticQueryDefinition));
-        }
-
-        String createDDL = generateDDL(SchemaExport.Action.CREATE, metadata, serviceRegistry, importFile);
-        String dropDDL = generateDDL(SchemaExport.Action.DROP, metadata, serviceRegistry, importFile);
+        final List<QueryInfo> namedNativeQueries = new ArrayList<>();
+        //        for (NamedSQLQueryDefinition staticQueryDefinition : metadata.getNamedNativeQueryDefinitions()) {
+        //            namedNativeQueries.add(new QueryInfo(staticQueryDefinition));
+        //        }
+        //
+        final String createDDL = ""; //TODO generateDDL(SchemaExport.Action.CREATE, metadata, serviceRegistry, importFile);
+        final String dropDDL = ""; //TODO generateDDL(SchemaExport.Action.DROP, metadata, serviceRegistry, importFile);
 
         INSTANCE.persistenceUnits.put(persistenceUnitName, new PersistenceUnitInfo(persistenceUnitName, managedEntities,
                 namedQueries, namedNativeQueries, createDDL, dropDDL));
@@ -56,39 +45,39 @@ public class HibernateOrmDevConsoleInfoSupplier implements Supplier<HibernateOrm
     public static void clearData() {
         INSTANCE.persistenceUnits.clear();
     }
-
-    private static String generateDDL(SchemaExport.Action action, Metadata metadata, ServiceRegistry serviceRegistry,
-            String importFiles) {
-        SchemaExport schemaExport = new SchemaExport();
-        schemaExport.setFormat(true);
-        schemaExport.setDelimiter(";");
-        schemaExport.setImportFiles(importFiles);
-        StringWriter writer = new StringWriter();
-        try {
-            schemaExport.doExecution(action, false, metadata, serviceRegistry,
-                    new TargetDescriptor() {
-                        @Override
-                        public EnumSet<TargetType> getTargetTypes() {
-                            return EnumSet.of(TargetType.SCRIPT);
-                        }
-
-                        @Override
-                        public ScriptTargetOutput getScriptTargetOutput() {
-                            return new ScriptTargetOutputToWriter(writer) {
-                                @Override
-                                public void accept(String command) {
-                                    super.accept(command);
-                                }
-                            };
-                        }
-                    });
-        } catch (RuntimeException e) {
-            StringWriter stackTraceWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stackTraceWriter));
-            return "Could not generate DDL: \n" + stackTraceWriter.toString();
-        }
-        return writer.toString();
-    }
+    //
+    //    private static String generateDDL(SchemaExport.Action action, Metadata metadata, ServiceRegistry serviceRegistry,
+    //            String importFiles) {
+    //        SchemaExport schemaExport = new SchemaExport();
+    //        schemaExport.setFormat(true);
+    //        schemaExport.setDelimiter(";");
+    //        schemaExport.setImportFiles(importFiles);
+    //        StringWriter writer = new StringWriter();
+    //        try {
+    //            schemaExport.doExecution(action, false, metadata, serviceRegistry,
+    //                    new TargetDescriptor() {
+    //                        @Override
+    //                        public EnumSet<TargetType> getTargetTypes() {
+    //                            return EnumSet.of(TargetType.SCRIPT);
+    //                        }
+    //
+    //                        @Override
+    //                        public ScriptTargetOutput getScriptTargetOutput() {
+    //                            return new ScriptTargetOutputToWriter(writer) {
+    //                                @Override
+    //                                public void accept(String command) {
+    //                                    super.accept(command);
+    //                                }
+    //                            };
+    //                        }
+    //                    });
+    //        } catch (RuntimeException e) {
+    //            StringWriter stackTraceWriter = new StringWriter();
+    //            e.printStackTrace(new PrintWriter(stackTraceWriter));
+    //            return "Could not generate DDL: \n" + stackTraceWriter.toString();
+    //        }
+    //        return writer.toString();
+    //    }
 
     @Override
     public PersistenceUnitsInfo get() {
@@ -196,15 +185,20 @@ public class HibernateOrmDevConsoleInfoSupplier implements Supplier<HibernateOrm
         private final String lockMode;
         private final String type;
 
-        public QueryInfo(NamedQueryDefinition queryDefinition) {
-            this.name = queryDefinition.getName();
-            this.query = queryDefinition.getQuery();
-            this.cacheable = queryDefinition.isCacheable();
-            LockOptions lockOptions = queryDefinition.getLockOptions();
-            this.lockMode = lockOptions != null && lockOptions.getLockMode() != null
-                    ? lockOptions.getLockMode().name()
-                    : "";
-            this.type = queryDefinition instanceof NamedSQLQueryDefinition ? "native" : "JPQL";
+        public QueryInfo(/* NamedQueryDefinition queryDefinition */) {
+            /*
+             * this.name = queryDefinition.getName(); this.query =
+             * queryDefinition.getQuery(); this.cacheable = queryDefinition.isCacheable();
+             * LockOptions lockOptions = queryDefinition.getLockOptions(); this.lockMode =
+             * lockOptions != null && lockOptions.getLockMode() != null ?
+             * lockOptions.getLockMode().name() : ""; this.type = queryDefinition instanceof
+             * NamedSQLQueryDefinition ? "native" : "JPQL";
+             */
+            this.name = "undef";
+            this.query = "undef";
+            this.lockMode = "undef";
+            this.type = "undef";
+            this.cacheable = false;
         }
 
         public String getName() {
