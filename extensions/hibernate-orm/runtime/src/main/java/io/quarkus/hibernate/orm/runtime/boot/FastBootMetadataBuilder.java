@@ -184,7 +184,8 @@ public class FastBootMetadataBuilder {
         // which only allows specifying mappings as files/resources,
         // and we really don't want any XML parsing here...
         for (RecordableXmlMapping mapping : puDefinition.getXmlMappings()) {
-            metadataSources.addXmlBinding(mapping.toHibernateOrmBinding());
+            throw new IllegalStateException("Support for XML mappings in the Hibernate ORM wasn't implemented yet");
+            //            metadataSources.addXmlBinding(mapping.toHibernateOrmBinding());
         }
 
         this.metamodelBuilder = (MetadataBuilderImplementor) metadataSources
