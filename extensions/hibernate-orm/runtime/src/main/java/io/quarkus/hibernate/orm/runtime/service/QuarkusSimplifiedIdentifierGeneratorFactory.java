@@ -143,12 +143,12 @@ final class QuarkusSimplifiedIdentifierGeneratorFactory
     public IdentifierGenerator createIdentifierGenerator(String strategy, Type type, Properties config) {
         try {
             final Class<? extends IdentifierGenerator> clazz = getIdentifierGeneratorClass(strategy);
-            final IdentifierGenerator identifierGenerator = clazz.newInstance();
+            final IdentifierGenerator identifierGenerator = clazz.getDeclaredConstructor().newInstance();
             identifierGenerator.configure(type, config, serviceRegistry);
             return identifierGenerator;
         } catch (Exception e) {
             final String entityName = config.getProperty(IdentifierGenerator.ENTITY_NAME);
-            throw new MappingException(String.format("Could not instantiate id generator [entity-name=%s]", entityName), e);
+            throw new MappingException("Could not instantiate id generator [entity-name=" + entityName + "]", e);
         }
     }
 
