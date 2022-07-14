@@ -41,7 +41,6 @@ import org.hibernate.boot.model.process.spi.ManagedResources;
 import org.hibernate.boot.model.process.spi.MetadataBuildingProcess;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
-import org.hibernate.boot.registry.selector.spi.StrategySelector;
 import org.hibernate.boot.spi.MetadataBuilderContributor;
 import org.hibernate.boot.spi.MetadataBuilderImplementor;
 import org.hibernate.cache.internal.CollectionCacheInvalidator;
@@ -59,7 +58,6 @@ import org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor;
 import org.hibernate.jpa.boot.spi.TypeContributorList;
 import org.hibernate.jpa.internal.util.LogHelper;
 import org.hibernate.jpa.internal.util.PersistenceUnitTransactionTypeHelper;
-import org.hibernate.jpa.spi.IdentifierGeneratorStrategyProvider;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorBuilderImpl;
 import org.hibernate.resource.transaction.backend.jta.internal.JtaTransactionCoordinatorBuilderImpl;
@@ -152,7 +150,7 @@ public class FastBootMetadataBuilder {
             ssrBuilder.applySetting(key, entry.getValue());
         }
         this.standardServiceRegistry = ssrBuilder.build();
-        registerIdentifierGenerators(standardServiceRegistry);
+        //        registerIdentifierGenerators(standardServiceRegistry);
 
         this.providedServices = ssrBuilder.getProvidedServices();
 
@@ -582,26 +580,28 @@ public class FastBootMetadataBuilder {
         }
     }
 
-    private void registerIdentifierGenerators(StandardServiceRegistry ssr) {
-        final StrategySelector strategySelector = ssr.getService(StrategySelector.class);
-
-        // apply id generators
-        final Object idGeneratorStrategyProviderSetting = buildTimeSettings
-                .get(AvailableSettings.IDENTIFIER_GENERATOR_STRATEGY_PROVIDER);
-        if (idGeneratorStrategyProviderSetting != null) {
-            final IdentifierGeneratorStrategyProvider idGeneratorStrategyProvider = strategySelector
-                    .resolveStrategy(IdentifierGeneratorStrategyProvider.class, idGeneratorStrategyProviderSetting);
-            final MutableIdentifierGeneratorFactory identifierGeneratorFactory = ssr
-                    .getService(MutableIdentifierGeneratorFactory.class);
-            if (identifierGeneratorFactory == null) {
-                throw persistenceException("Application requested custom identifier generator strategies, "
-                        + "but the MutableIdentifierGeneratorFactory could not be found");
-            }
-            for (Map.Entry<String, Class<?>> entry : idGeneratorStrategyProvider.getStrategies().entrySet()) {
-                identifierGeneratorFactory.register(entry.getKey(), entry.getValue());
-            }
-        }
-    }
+    /**
+     * private void registerIdentifierGenerators(StandardServiceRegistry ssr) {
+     * final StrategySelector strategySelector = ssr.getService(StrategySelector.class);
+     *
+     * // apply id generators
+     * final Object idGeneratorStrategyProviderSetting = buildTimeSettings
+     * .get(AvailableSettings.IDENTIFIER_GENERATOR_STRATEGY_PROVIDER);
+     * if (idGeneratorStrategyProviderSetting != null) {
+     * final IdentifierGeneratorStrategyProvider idGeneratorStrategyProvider = strategySelector
+     * .resolveStrategy(IdentifierGeneratorStrategyProvider.class, idGeneratorStrategyProviderSetting);
+     * final MutableIdentifierGeneratorFactory identifierGeneratorFactory = ssr
+     * .getService(MutableIdentifierGeneratorFactory.class);
+     * if (identifierGeneratorFactory == null) {
+     * throw persistenceException("Application requested custom identifier generator strategies, "
+     * + "but the MutableIdentifierGeneratorFactory could not be found");
+     * }
+     * for (Map.Entry<String, Class<?>> entry : idGeneratorStrategyProvider.getStrategies().entrySet()) {
+     * identifierGeneratorFactory.register(entry.getKey(), entry.getValue());
+     * }
+     * }
+     * }
+     **/
 
     /**
      * Greatly simplified copy of
