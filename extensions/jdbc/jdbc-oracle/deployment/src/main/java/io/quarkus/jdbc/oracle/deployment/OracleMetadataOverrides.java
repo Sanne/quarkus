@@ -2,13 +2,20 @@ package io.quarkus.jdbc.oracle.deployment;
 
 import java.util.Collections;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
+import io.quarkus.deployment.builditem.BytecodeTransformerBuildItem;
 import io.quarkus.deployment.builditem.RemovedResourceBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ExcludeConfigBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageAllowIncompleteClasspathBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
+import io.quarkus.gizmo.Gizmo;
 import io.quarkus.maven.dependency.ArtifactKey;
 
 /**
@@ -131,6 +138,53 @@ public final class OracleMetadataOverrides {
     RemovedResourceBuildItem enhancedCharsetSubstitutions() {
         return new RemovedResourceBuildItem(ArtifactKey.fromString("com.oracle.database.jdbc:ojdbc11"),
                 Collections.singleton("oracle/nativeimage/CharacterSetFeature.class"));
+    }
+
+    @BuildStep
+    BytecodeTransformerBuildItem stripMBeansSupport() {
+        return new BytecodeTransformerBuildItem.Builder()
+                .setCacheable(true)
+                .setContinueOnFailure(false)
+                .setClassToTransform("oracle.jdbc.driver.OracleDriver")
+                .setClassReaderOptions(ClassReader.SKIP_DEBUG)
+                .setVisitorFunction(this::mbeansStripper)
+                .build();
+    }
+
+    private ClassVisitor mbeansStripper(String className, ClassVisitor outputClassVisitor) {
+        return new MbeansRemovingClassVisitor(outputClassVisitor);
+    }
+
+    static class MbeansRemovingClassVisitor extends ClassVisitor {
+
+        public MbeansRemovingClassVisitor(ClassVisitor outputClassVisitor) {
+            super(Gizmo.ASM_API_VERSION, outputClassVisitor);
+        }
+
+        @Override
+        public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+            if ("registerMBeans".equals(name) || "unRegisterMBeans".equals(name)) {
+                MethodVisitor superVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
+                return new MethodBodyRemover(superVisitor);
+            } else {
+                return super.visitMethod(access, name, descriptor, signature, exceptions);
+            }
+        }
+
+    }
+
+    static class MethodBodyRemover extends MethodVisitor {
+
+        public MethodBodyRemover(MethodVisitor writer) {
+            super(Gizmo.ASM_API_VERSION, writer);
+        }
+
+        @Override
+        public void visitCode() {
+            super.visitCode();
+            super.visitInsn(Opcodes.RETURN);
+        }
+
     }
 
 }
