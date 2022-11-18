@@ -76,10 +76,4 @@ recipeList:
       oldArtifactId: hibernate-jpamodelgen-jakarta
       newGroupId: org.hibernate.orm
       newArtifactId: hibernate-jpamodelgen
-  - org.openrewrite.maven.AddDependencyNoQuestionsAsked:
-      groupId: net.bytebuddy
-      artifactId: byte-buddy
-  - org.openrewrite.maven.AddDependencyNoQuestionsAsked:
-      groupId: org.hibernate.common
-      artifactId: hibernate-commons-annotations
-      
+
