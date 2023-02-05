@@ -13,6 +13,7 @@ import org.hibernate.engine.jdbc.dialect.internal.DialectResolverInitiator;
 import org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator;
 import org.hibernate.engine.jdbc.internal.JdbcServicesInitiator;
 import org.hibernate.event.internal.EntityCopyObserverFactoryInitiator;
+import org.hibernate.id.factory.internal.StandardIdentifierGeneratorFactoryInitiator;
 import org.hibernate.persister.internal.PersisterClassResolverInitiator;
 import org.hibernate.persister.internal.PersisterFactoryInitiator;
 import org.hibernate.property.access.internal.PropertyAccessStrategyResolverInitiator;
@@ -46,6 +47,9 @@ public final class StandardHibernateORMInitiatorListProvider implements InitialI
 
         //This one needs to be replaced after Metadata has been recorded:
         serviceInitiators.add(BootstrapOnlyProxyFactoryFactoryInitiator.INSTANCE);
+
+        //Standard:
+        serviceInitiators.add(StandardIdentifierGeneratorFactoryInitiator.INSTANCE);
 
         serviceInitiators.add(CfgXmlAccessServiceInitiator.INSTANCE);
         serviceInitiators.add(ConfigurationServiceInitiator.INSTANCE);
