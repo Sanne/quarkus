@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.persistence.GenerationType;
 
 import org.hibernate.MappingException;
-import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.registry.classloading.spi.ClassLoadingException;
 import org.hibernate.dialect.Dialect;
@@ -117,7 +116,7 @@ final class QuarkusSimplifiedIdentifierGeneratorFactory
                     definitionResolver,
                     serviceRegistry);
         }
-        throw new NotYetImplementedFor6Exception(getClass());
+        throw new UnsupportedOperationException("No GenerationTypeStrategy specified");
     }
 
     @Override //Same-as-upstream
