@@ -265,10 +265,10 @@ public class FastBootMetadataBuilder {
                     Boolean.getBoolean(AvailableSettings.ALLOW_UPDATE_OUTSIDE_TRANSACTION));
         }
 
-        //Enable the new Enhanced Proxies capability (unless it was specifically disabled):
         final String legacyALLOW_ENHANCEMENT_AS_PROXY = "hibernate.bytecode.allow_enhancement_as_proxy";
-        if (!cfg.containsKey(legacyALLOW_ENHANCEMENT_AS_PROXY)) {
-            cfg.put(legacyALLOW_ENHANCEMENT_AS_PROXY, Boolean.TRUE.toString());
+        if (cfg.containsKey(legacyALLOW_ENHANCEMENT_AS_PROXY)) {
+            LOG.warn("Setting '" + legacyALLOW_ENHANCEMENT_AS_PROXY
+                    + "' is being ignored: this property was ignored in Hibernate ORM 6");
         }
         //Always Order batch updates as it prevents contention on the data (unless it was disabled)
         if (!cfg.containsKey(AvailableSettings.ORDER_UPDATES)) {
