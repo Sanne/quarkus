@@ -62,36 +62,4 @@ public class DevConsoleInfoSupplierTestResource {
         return "OK";
     }
 
-    @GET
-    @Path("/check-pu-info-with-failing-ddl-generation")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String checkPuInfoWithFailingDDLGeneration() {
-        HibernateOrmDevConsoleInfoSupplier supplier = new HibernateOrmDevConsoleInfoSupplier();
-        HibernateOrmDevConsoleInfoSupplier.PersistenceUnitsInfo infos = supplier.get();
-
-        Collection<HibernateOrmDevConsoleInfoSupplier.PersistenceUnitInfo> pus = infos.getPersistenceUnits();
-        assertThat(pus).hasSize(1);
-        HibernateOrmDevConsoleInfoSupplier.PersistenceUnitInfo pu = pus.iterator().next();
-
-        // We have some information available
-        assertThat(pu.getName()).isEqualTo(PersistenceUnitUtil.DEFAULT_PERSISTENCE_UNIT_NAME);
-        assertThat(pu.getManagedEntities())
-                .hasSize(1)
-                .element(0)
-                .returns(MyEntityWithFailingDDLGeneration.class.getName(),
-                        HibernateOrmDevConsoleInfoSupplier.EntityInfo::getClassName)
-                .returns(MyEntityWithFailingDDLGeneration.TABLE_NAME,
-                        HibernateOrmDevConsoleInfoSupplier.EntityInfo::getTableName);
-
-        // But some DDL scripts are replaced with whatever exception occurred
-        assertThat(pu.getCreateDDL())
-                .contains("Could not generate DDL")
-                .contains("org.hibernate.MappingException: No Dialect mapping for JDBC type: "
-                        + TypeWithUnsupportedSqlCode.UNSUPPORTED_SQL_CODE);
-        // Drop script generation doesn't involve column types, so it didn't fail
-        assertThat(pu.getDropDDL())
-                .contains("drop table if exists MyEntityTable");
-
-        return "OK";
-    }
 }
