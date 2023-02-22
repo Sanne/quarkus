@@ -6,7 +6,7 @@ import org.hibernate.boot.registry.StandardServiceInitiator;
 import org.hibernate.engine.jdbc.dialect.spi.DialectFactory;
 import org.hibernate.service.spi.ServiceRegistryImplementor;
 
-import io.quarkus.hibernate.orm.runtime.recording.RecordingDialectFactory;
+import io.quarkus.hibernate.orm.runtime.recording.BlockingOrmRecordingDialectFactory;
 
 /**
  * Copied from
@@ -23,6 +23,6 @@ public class DialectFactoryInitiator implements StandardServiceInitiator<Dialect
 
     @Override
     public DialectFactory initiateService(Map configurationValues, ServiceRegistryImplementor registry) {
-        return new RecordingDialectFactory();
+        return new BlockingOrmRecordingDialectFactory();
     }
 }

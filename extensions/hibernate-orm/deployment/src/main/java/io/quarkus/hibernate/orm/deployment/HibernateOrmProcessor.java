@@ -188,22 +188,26 @@ public final class HibernateOrmProcessor {
     @BuildStep
     void registerHibernateOrmMetadataForCoreDialects(
             BuildProducer<DatabaseKindDialectBuildItem> producer) {
+        //Mappings DatabaseKind to the default short names in org.hibernate.boot.registry.selector.internal.DefaultDialectSelector:
+        //this is intentionally broad, so that the ORM engine can assume it has flexibility to refine the choice
+        //w/o needing to issue override warnings.
+        //We will reserve the right re-map the resolution to the Quarkus variation of such dialects during resolution.
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.DB2,
-                "org.hibernate.dialect.DB297Dialect"));
+                "DB2"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.DERBY,
-                "org.hibernate.dialect.DerbyTenSevenDialect"));
+                "Derby"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.H2,
-                "io.quarkus.hibernate.orm.runtime.dialect.QuarkusH2Dialect"));
+                "H2"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.MARIADB,
-                "org.hibernate.dialect.MariaDB106Dialect"));
+                "MariaDB"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.MSSQL,
-                "org.hibernate.dialect.SQLServer2016Dialect"));
+                "SQLServer"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.MYSQL,
-                "org.hibernate.dialect.MySQL8Dialect"));
+                "MySQL"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.ORACLE,
-                "org.hibernate.dialect.Oracle12cDialect"));
+                "Oracle"));
         producer.produce(new DatabaseKindDialectBuildItem(DatabaseKind.POSTGRESQL,
-                "io.quarkus.hibernate.orm.runtime.dialect.QuarkusPostgreSQL10Dialect"));
+                "PostgreSQL"));
     }
 
     @BuildStep

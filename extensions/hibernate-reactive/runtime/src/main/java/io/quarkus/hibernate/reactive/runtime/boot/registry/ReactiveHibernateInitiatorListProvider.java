@@ -10,7 +10,6 @@ import org.hibernate.engine.jdbc.batch.internal.BatchBuilderInitiator;
 import org.hibernate.engine.jdbc.connections.internal.MultiTenantConnectionProviderInitiator;
 import org.hibernate.engine.jdbc.cursor.internal.RefCursorSupportInitiator;
 import org.hibernate.engine.jdbc.dialect.internal.DialectResolverInitiator;
-import org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator;
 import org.hibernate.engine.jdbc.internal.JdbcServicesInitiator;
 import org.hibernate.event.internal.EntityCopyObserverFactoryInitiator;
 import org.hibernate.persister.internal.PersisterFactoryInitiator;
@@ -27,13 +26,14 @@ import org.hibernate.service.internal.SessionFactoryServiceRegistryFactoryInitia
 import io.quarkus.hibernate.orm.runtime.cdi.QuarkusManagedBeanRegistryInitiator;
 import io.quarkus.hibernate.orm.runtime.customized.BootstrapOnlyProxyFactoryFactoryInitiator;
 import io.quarkus.hibernate.orm.runtime.customized.QuarkusJndiServiceInitiator;
-import io.quarkus.hibernate.orm.runtime.service.DialectFactoryInitiator;
 import io.quarkus.hibernate.orm.runtime.service.InitialInitiatorListProvider;
 import io.quarkus.hibernate.orm.runtime.service.QuarkusImportSqlCommandExtractorInitiator;
 import io.quarkus.hibernate.orm.runtime.service.QuarkusMutableIdentifierGeneratorFactoryInitiator;
 import io.quarkus.hibernate.orm.runtime.service.QuarkusRegionFactoryInitiator;
 import io.quarkus.hibernate.orm.runtime.service.StandardHibernateORMInitiatorListProvider;
 import io.quarkus.hibernate.reactive.runtime.customized.QuarkusNoJdbcConnectionProviderInitiator;
+import io.quarkus.hibernate.reactive.runtime.customized.ReactiveDialectOverridingJdbcEnvironmentInitiator;
+import io.quarkus.hibernate.reactive.runtime.customized.ReactiveRecordingDialectFactoryInitiator;
 
 /**
  * Defines the initial list of StandardServiceInitiator instances used to initialize the
@@ -64,7 +64,7 @@ public final class ReactiveHibernateInitiatorListProvider implements InitialInit
 
         serviceInitiators.add(QuarkusImportSqlCommandExtractorInitiator.INSTANCE);
 
-        serviceInitiators.add(JdbcEnvironmentInitiator.INSTANCE);
+        serviceInitiators.add(ReactiveDialectOverridingJdbcEnvironmentInitiator.INSTANCE);
 
         // Custom one!
         serviceInitiators.add(QuarkusJndiServiceInitiator.INSTANCE);
@@ -81,7 +81,7 @@ public final class ReactiveHibernateInitiatorListProvider implements InitialInit
         serviceInitiators.add(DialectResolverInitiator.INSTANCE);
 
         // Custom Quarkus implementation !
-        serviceInitiators.add(DialectFactoryInitiator.INSTANCE);
+        serviceInitiators.add(ReactiveRecordingDialectFactoryInitiator.INSTANCE);
 
         // Default implementation
         serviceInitiators.add(BatchBuilderInitiator.INSTANCE);
