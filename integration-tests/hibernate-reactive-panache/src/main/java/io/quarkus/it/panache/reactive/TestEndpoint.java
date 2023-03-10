@@ -354,7 +354,8 @@ public class TestEndpoint {
                     Person person1 = new Person();
                     person1.name = "testFLush1";
                     person1.uniqueName = "unique";
-                    return person1.persist();
+                    // FIXME: HR bug
+                    return person1.persistAndFlush();
                     // FIXME: https://github.com/hibernate/hibernate-reactive/issues/281
                     //                }).flatMap(v -> {
                     //                    Person person2 = new Person();
@@ -618,7 +619,9 @@ public class TestEndpoint {
         person.status = Status.LIVING;
         person.address = new Address("stef street");
         return person.address.persist()
-                .flatMap(v -> person.persist());
+                .<Person> flatMap(v -> person.persist())
+                // FIXME: work around HR bug
+                .call(v -> Panache.flush());
     }
 
     private Uni<Person> makeSavedPersonDao(String suffix) {
@@ -627,7 +630,9 @@ public class TestEndpoint {
         person.status = Status.LIVING;
         person.address = new Address("stef street");
         return addressDao.persist(person.address)
-                .flatMap(v -> personDao.persist(person));
+                .flatMap(v -> personDao.persist(person))
+                // FIXME: work around HR bug
+                .call(v -> Panache.flush());
     }
 
     private Uni<Person> makeSavedPerson() {
@@ -637,7 +642,8 @@ public class TestEndpoint {
             Dog dog = new Dog("octave", "dalmatian");
             dog.owner = person;
             person.dogs.add(dog);
-            return dog.persist().map(d -> person);
+            // FIXME: flush temporary due to HR bug
+            return dog.persist().flatMap(v -> Panache.flush()).map(d -> person);
         });
     }
 
@@ -648,7 +654,8 @@ public class TestEndpoint {
             Dog dog = new Dog("octave", "dalmatian");
             dog.owner = person;
             person.dogs.add(dog);
-            return dog.persist().map(d -> person);
+            // FIXME: flush temporary due to HR bug
+            return dog.persist().flatMap(v -> Panache.flush()).map(d -> person);
         });
     }
 
@@ -674,7 +681,8 @@ public class TestEndpoint {
             default:
                 throw new RuntimeException("Ouch");
         }
-        return persist.map(v -> {
+        // FIXME: flush temporary due to HR bug
+        return persist.flatMap(v -> Panache.flush()).map(v -> {
             assertTrue(person1.isPersistent());
             assertTrue(person2.isPersistent());
             return null;
@@ -703,7 +711,8 @@ public class TestEndpoint {
             default:
                 throw new RuntimeException("Ouch");
         }
-        return persist.map(v -> {
+        // FIXME: flush temporary due to HR bug
+        return persist.flatMap(v -> Panache.flush()).map(v -> {
             assertTrue(personDao.isPersistent(person1));
             assertTrue(personDao.isPersistent(person2));
             return null;
