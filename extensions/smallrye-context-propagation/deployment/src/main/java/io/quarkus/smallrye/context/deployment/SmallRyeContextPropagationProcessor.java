@@ -39,7 +39,10 @@ import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.ExecutorBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.ShutdownContextBuildItem;
+import io.quarkus.deployment.builditem.SystemPropertyBuildItem;
 import io.quarkus.deployment.util.ServiceUtil;
+import io.quarkus.runtime.LaunchMode;
+import io.quarkus.runtime.configuration.ProfileManager;
 import io.quarkus.smallrye.context.deployment.spi.ThreadContextProviderBuildItem;
 import io.quarkus.smallrye.context.runtime.SmallRyeContextPropagationProvider;
 import io.quarkus.smallrye.context.runtime.SmallRyeContextPropagationRecorder;
@@ -51,6 +54,13 @@ import io.smallrye.context.api.ThreadContextConfig;
  * The deployment processor for MP-CP applications
  */
 class SmallRyeContextPropagationProcessor {
+
+    @BuildStep
+    void optimizedCloseContext(BuildProducer<SystemPropertyBuildItem> builder) {
+        if (ProfileManager.getLaunchMode() == LaunchMode.NORMAL) {
+            builder.produce(new SystemPropertyBuildItem("io.smallrye.context.storage.CLOSE_SETTING_NULL", "true"));
+        }
+    }
 
     @BuildStep
     void registerBean(BuildProducer<AdditionalBeanBuildItem> additionalBeans) {
