@@ -40,5 +40,7 @@ public final class HibernateLogFilterBuildStep {
         //property (we have a custom DialectFactory already so this could be trivial), however even in this case ORM
         //can't guess things since there is no connection, so even if we did so, this message wouldn't be applicable.
         filters.produce(new LogCleanupFilterBuildItem("org.hibernate.orm.deprecation", "HHH90000025"));
+
+        filters.produce(new LogCleanupFilterBuildItem("org.hibernate.orm.beans", "HHH10005004"));
     }
 }
