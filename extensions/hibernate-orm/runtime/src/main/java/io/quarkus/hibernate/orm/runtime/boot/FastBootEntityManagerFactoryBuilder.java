@@ -16,6 +16,7 @@ import org.hibernate.SessionFactoryObserver;
 import org.hibernate.boot.internal.SessionFactoryOptionsBuilder;
 import org.hibernate.boot.model.process.spi.ManagedResources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.registry.selector.spi.StrategySelector;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.bytecode.internal.SessionFactoryObserverForBytecodeEnhancer;
@@ -42,6 +43,7 @@ import io.quarkus.hibernate.orm.runtime.observers.QuarkusSessionFactoryObserverF
 import io.quarkus.hibernate.orm.runtime.observers.SessionFactoryObserverForNamedQueryValidation;
 import io.quarkus.hibernate.orm.runtime.observers.SessionFactoryObserverForSchemaExport;
 import io.quarkus.hibernate.orm.runtime.recording.PrevalidatedQuarkusMetadata;
+import io.quarkus.hibernate.orm.runtime.service.FlatClassLoaderService;
 import io.quarkus.hibernate.orm.runtime.tenant.HibernateCurrentTenantIdentifierResolver;
 
 public class FastBootEntityManagerFactoryBuilder implements EntityManagerFactoryBuilder {
@@ -167,6 +169,9 @@ public class FastBootEntityManagerFactoryBuilder implements EntityManagerFactory
         }
 
         options.addSessionFactoryObservers(new ServiceRegistryCloser());
+
+        // Custom in Quarkus, to clear the memory used during bootstrap in caches of our custom FlatClassLoaderService:
+        options.addSessionFactoryObservers((FlatClassLoaderService) ssr.getService(ClassLoaderService.class));
 
         //New in ORM 6.2:
         options.addSessionFactoryObservers(new SessionFactoryObserverForNamedQueryValidation(metadata));
