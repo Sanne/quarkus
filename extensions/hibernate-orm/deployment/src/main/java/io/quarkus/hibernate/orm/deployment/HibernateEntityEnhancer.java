@@ -2,9 +2,7 @@ package io.quarkus.hibernate.orm.deployment;
 
 import java.util.function.BiFunction;
 
-import org.hibernate.bytecode.enhance.spi.DefaultEnhancementContext;
 import org.hibernate.bytecode.enhance.spi.Enhancer;
-import org.hibernate.bytecode.enhance.spi.UnloadedField;
 import org.hibernate.bytecode.spi.BytecodeProvider;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -13,6 +11,7 @@ import org.objectweb.asm.ClassWriter;
 import io.quarkus.deployment.QuarkusClassVisitor;
 import io.quarkus.deployment.QuarkusClassWriter;
 import io.quarkus.gizmo.Gizmo;
+import io.quarkus.hibernate.orm.deployment.integration.QuarkusEnhancementContext;
 import net.bytebuddy.ClassFileVersion;
 
 /**
@@ -32,9 +31,11 @@ public final class HibernateEntityEnhancer implements BiFunction<String, ClassVi
     private static final BytecodeProvider PROVIDER = new org.hibernate.bytecode.internal.bytebuddy.BytecodeProviderImpl(
             ClassFileVersion.JAVA_V11);
 
+    private final Enhancer enhancer = PROVIDER.getEnhancer(new QuarkusEnhancementContext());
+
     @Override
     public ClassVisitor apply(String className, ClassVisitor outputClassVisitor) {
-        return new HibernateEnhancingClassVisitor(className, outputClassVisitor);
+        return new HibernateEnhancingClassVisitor(className, outputClassVisitor, enhancer);
     }
 
     private static class HibernateEnhancingClassVisitor extends QuarkusClassVisitor {
@@ -43,30 +44,14 @@ public final class HibernateEntityEnhancer implements BiFunction<String, ClassVi
         private final ClassVisitor outputClassVisitor;
         private final Enhancer enhancer;
 
-        public HibernateEnhancingClassVisitor(String className, ClassVisitor outputClassVisitor) {
+        public HibernateEnhancingClassVisitor(String className, ClassVisitor outputClassVisitor,
+                Enhancer enhancer) {
             //Careful: the ASM API version needs to match the ASM version of Gizmo, not the one from Byte Buddy.
             //Most often these match - but occasionally they will diverge which is acceptable as Byte Buddy is shading ASM.
             super(Gizmo.ASM_API_VERSION, new QuarkusClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS));
             this.className = className;
             this.outputClassVisitor = outputClassVisitor;
-            //note that as getLoadingClassLoader is resolved immediately this can't be created until transform time
-
-            DefaultEnhancementContext enhancementContext = new DefaultEnhancementContext() {
-
-                @Override
-                public boolean doBiDirectionalAssociationManagement(final UnloadedField field) {
-                    //Don't enable automatic association management as it's often too surprising.
-                    //Also, there's several cases in which its semantics are of unspecified,
-                    //such as what should happen when dealing with ordered collections.
-                    return false;
-                }
-
-                @Override
-                public ClassLoader getLoadingClassLoader() {
-                    return Thread.currentThread().getContextClassLoader();
-                }
-            };
-            this.enhancer = PROVIDER.getEnhancer(enhancementContext);
+            this.enhancer = enhancer;
         }
 
         @Override
@@ -90,14 +75,7 @@ public final class HibernateEntityEnhancer implements BiFunction<String, ClassVi
     }
 
     public byte[] enhance(String className, byte[] bytes) {
-        DefaultEnhancementContext enhancementContext = new DefaultEnhancementContext() {
-            @Override
-            public ClassLoader getLoadingClassLoader() {
-                return Thread.currentThread().getContextClassLoader();
-            }
-
-        };
-        Enhancer enhancer = PROVIDER.getEnhancer(enhancementContext);
         return enhancer.enhance(className, bytes);
     }
+
 }
