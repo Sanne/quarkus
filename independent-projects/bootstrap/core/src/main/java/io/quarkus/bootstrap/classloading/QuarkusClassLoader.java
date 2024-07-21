@@ -50,6 +50,8 @@ public class QuarkusClassLoader extends ClassLoader implements Closeable {
         registerAsParallelCapable();
     }
 
+    private final NamedExclusiveSingleOperations<Package,ClassPathElement> packageDefinitionLocks = new NamedExclusiveSingleOperations<>();
+
     public static List<ClassPathElement> getElements(String resourceName, boolean onlyFromCurrentClassLoader) {
         final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
         if (!(ccl instanceof QuarkusClassLoader)) {
@@ -575,26 +577,31 @@ public class QuarkusClassLoader extends ClassLoader implements Closeable {
         final String pkgName = getPackageNameFromClassName(name);
         //we can't use getPackage here
         //if can return a package from the parent
-        if ((pkgName != null) && definedPackages.get(pkgName) == null) {
-            synchronized (getClassLoadingLock(pkgName)) {
-                if (definedPackages.get(pkgName) == null) {
-                    Manifest mf = classPathElement.getManifest();
-                    if (mf != null) {
-                        Attributes ma = mf.getMainAttributes();
-                        definedPackages.put(pkgName, definePackage(pkgName, ma.getValue(Attributes.Name.SPECIFICATION_TITLE),
-                                ma.getValue(Attributes.Name.SPECIFICATION_VERSION),
-                                ma.getValue(Attributes.Name.SPECIFICATION_VENDOR),
-                                ma.getValue(Attributes.Name.IMPLEMENTATION_TITLE),
-                                ma.getValue(Attributes.Name.IMPLEMENTATION_VERSION),
-                                ma.getValue(Attributes.Name.IMPLEMENTATION_VENDOR), null));
-                        return;
-                    }
-
-                    // this could certainly be improved to use the actual manifest
-                    definedPackages.put(pkgName, definePackage(pkgName, null, null, null, null, null, null, null));
-                }
-            }
+        if (pkgName != null) {
+            packageDefinitionLocks.exclusiveExecution(pkgName, definedPackages::get, this::protectedPackageDefine, classPathElement);
         }
+    }
+
+    //This needs to be protected against concurrent access via namedLocks to ensure any individual package is defined once:
+    private Package protectedPackageDefine(final String pkgName, final ClassPathElement classPathElement) {
+        Manifest mf = classPathElement.getManifest();
+        final Package newPackage;
+        if (mf != null) {
+            Attributes ma = mf.getMainAttributes();
+            newPackage = definePackage(pkgName, ma.getValue(Attributes.Name.SPECIFICATION_TITLE),
+                                              ma.getValue(Attributes.Name.SPECIFICATION_VERSION),
+                                              ma.getValue(Attributes.Name.SPECIFICATION_VENDOR),
+                                              ma.getValue(Attributes.Name.IMPLEMENTATION_TITLE),
+                                              ma.getValue(Attributes.Name.IMPLEMENTATION_VERSION),
+                                              ma.getValue(Attributes.Name.IMPLEMENTATION_VENDOR), null
+            );
+        }
+        else {
+            // this could certainly be improved to use the actual manifest
+            newPackage = definePackage(pkgName, null, null, null, null, null, null, null);
+        }
+        definedPackages.put(pkgName, newPackage);
+        return newPackage;
     }
 
     private String getPackageNameFromClassName(String className) {
