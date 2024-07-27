@@ -103,7 +103,7 @@ public class PathsCollection implements PathCollection, Serializable {
     public PathsCollection addAllFirst(Iterable<Path> i) {
         final List<Path> list = new ArrayList<>();
         i.forEach(list::add);
-        paths.forEach(list::add);
+        list.addAll(paths);
         return new PathsCollection(list);
     }
 

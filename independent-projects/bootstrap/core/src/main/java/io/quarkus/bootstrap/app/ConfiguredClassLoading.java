@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -159,10 +160,7 @@ public class ConfiguredClassLoading implements Serializable {
                     String artifactId = key.substring(baseConfigKey.length());
                     artifactId = artifactId.replace("\"", "");
                     final String[] split = value.split(",");
-                    List<String> resources = new ArrayList<>(split.length);
-                    for (String s : split) {
-                        resources.add(s);
-                    }
+                    List<String> resources = Arrays.asList(split);
                     removedResources.put(new GACT(artifactId.split(":")), resources);
                 }
             }

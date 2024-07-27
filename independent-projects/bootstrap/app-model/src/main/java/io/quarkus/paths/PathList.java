@@ -109,7 +109,7 @@ public class PathList implements PathCollection, Serializable {
     public PathList addAllFirst(Iterable<Path> i) {
         final List<Path> list = new ArrayList<>();
         i.forEach(list::add);
-        paths.forEach(list::add);
+        list.addAll(paths);
         return new PathList(list);
     }
 
