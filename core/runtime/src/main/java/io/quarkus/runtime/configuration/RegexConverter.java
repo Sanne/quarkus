@@ -15,8 +15,6 @@ import org.eclipse.microprofile.config.spi.Converter;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class RegexConverter implements Converter<Pattern>, Serializable {
 
-    private static final long serialVersionUID = -2627801624423530576L;
-
     /**
      * Construct a new instance.
      */

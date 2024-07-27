@@ -16,8 +16,6 @@ import org.eclipse.microprofile.config.spi.Converter;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class PathConverter implements Converter<Path>, Serializable {
 
-    private static final long serialVersionUID = 4452863383998867844L;
-
     @Override
     public Path convert(String value) {
         return value.isEmpty() ? null : Paths.get(value);

@@ -15,8 +15,6 @@ import org.eclipse.microprofile.config.spi.Converter;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class ZoneIdConverter implements Converter<ZoneId>, Serializable {
 
-    private static final long serialVersionUID = -439010527617997936L;
-
     @Override
     public ZoneId convert(final String value) {
         return ZoneId.of(value);

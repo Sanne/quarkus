@@ -15,8 +15,6 @@ import org.eclipse.microprofile.config.spi.Converter;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class CharsetConverter implements Converter<Charset>, Serializable {
 
-    private static final long serialVersionUID = 2320905063828247874L;
-
     @Override
     public Charset convert(String value) {
         if (value == null) {

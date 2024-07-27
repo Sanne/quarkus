@@ -16,7 +16,6 @@ import org.eclipse.microprofile.config.spi.Converter;
  */
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class DurationConverter implements Converter<Duration>, Serializable {
-    private static final long serialVersionUID = 7499347081928776532L;
     private static final String PERIOD = "P";
     private static final String PERIOD_OF_TIME = "PT";
     public static final Pattern DIGITS = Pattern.compile("^[-+]?\\d+$");

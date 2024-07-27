@@ -16,8 +16,6 @@ import org.wildfly.common.net.Inet;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class CidrAddressConverter implements Converter<CidrAddress>, Serializable {
 
-    private static final long serialVersionUID = 2023552088048952902L;
-
     @Override
     public CidrAddress convert(String value) {
         value = value.trim();

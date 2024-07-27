@@ -20,8 +20,6 @@ import io.smallrye.common.net.Inet;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class InetSocketAddressConverter implements Converter<InetSocketAddress>, Serializable {
 
-    private static final long serialVersionUID = 1928336763333858343L;
-
     @Override
     public InetSocketAddress convert(String value) {
         value = value.trim();

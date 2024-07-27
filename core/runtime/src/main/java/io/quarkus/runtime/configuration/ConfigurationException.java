@@ -10,7 +10,6 @@ import io.quarkus.dev.config.ConfigurationProblem;
  * An exception indicating that a configuration failure has occurred.
  */
 public class ConfigurationException extends RuntimeException implements ConfigurationProblem {
-    private static final long serialVersionUID = 4445679764085720090L;
 
     private final Set<String> configKeys;
 

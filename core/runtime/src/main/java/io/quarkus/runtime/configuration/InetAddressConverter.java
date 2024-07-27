@@ -18,8 +18,6 @@ import io.smallrye.common.net.Inet;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public class InetAddressConverter implements Converter<InetAddress>, Serializable {
 
-    private static final long serialVersionUID = 4539214213710330204L;
-
     @Override
     public InetAddress convert(String value) {
         value = value.trim();

@@ -17,8 +17,6 @@ import org.jboss.logmanager.LogContext;
 @Priority(DEFAULT_QUARKUS_CONVERTER_PRIORITY)
 public final class LevelConverter implements Converter<Level>, Serializable {
 
-    private static final long serialVersionUID = 704275577610445233L;
-
     public Level convert(final String value) {
         if (value == null || value.isEmpty()) {
             return null;

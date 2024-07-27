@@ -21,7 +21,6 @@ public class MemorySizeConverter implements Converter<MemorySize>, Serializable 
     private static final Pattern MEMORY_SIZE_PATTERN = Pattern.compile("^(\\d+)([BbKkMmGgTtPpEeZzYy]?)$");
     static final BigInteger KILO_BYTES = BigInteger.valueOf(1024);
     private static final Map<String, BigInteger> MEMORY_SIZE_MULTIPLIERS;
-    private static final long serialVersionUID = -1988485929047973068L;
 
     static {
         MEMORY_SIZE_MULTIPLIERS = new HashMap<>();
