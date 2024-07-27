@@ -104,7 +104,7 @@ public class ResolvedArtifactDependency extends ArtifactDependency implements Re
         final StringBuilder buf = new StringBuilder();
         buf.append(toGACTVString()).append(paths);
         if (module != null) {
-            buf.append(" " + module);
+            buf.append(" ").append(module);
         }
         return buf.toString();
     }
