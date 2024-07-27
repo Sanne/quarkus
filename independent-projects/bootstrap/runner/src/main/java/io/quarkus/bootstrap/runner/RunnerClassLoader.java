@@ -47,8 +47,6 @@ public final class RunnerClassLoader extends ClassLoader {
     //Protected by synchronization on the above field, as they are related.
     private boolean postBootPhase = false;
 
-    private final CracResource resource;
-
     RunnerClassLoader(ClassLoader parent, Map<String, ClassLoadingResource[]> resourceDirectoryMap,
             Set<String> parentFirstPackages, Set<String> nonExistentResources,
             List<String> fullyIndexedDirectories, Map<String, ClassLoadingResource[]> directlyIndexedResourcesIndexMap) {
@@ -59,8 +57,7 @@ public final class RunnerClassLoader extends ClassLoader {
         this.fullyIndexedDirectories = fullyIndexedDirectories;
         this.directlyIndexedResourcesIndexMap = directlyIndexedResourcesIndexMap;
 
-        resource = new CracResource();
-        org.crac.Core.getGlobalContext().register(resource);
+        org.crac.Core.getGlobalContext().register(new CracResource());
     }
 
     @Override
@@ -302,7 +299,7 @@ public final class RunnerClassLoader extends ClassLoader {
         }
     }
 
-    class CracResource implements Resource {
+    private final class CracResource implements Resource {
         @Override
         public void beforeCheckpoint(Context<? extends Resource> ctx) {
             synchronized (currentlyBufferedResources) {
