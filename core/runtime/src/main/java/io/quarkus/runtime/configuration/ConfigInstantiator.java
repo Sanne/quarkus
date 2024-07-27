@@ -40,7 +40,7 @@ import io.smallrye.config.SmallRyeConfig;
 public class ConfigInstantiator {
 
     // certain well-known classname suffixes that we support
-    private static Set<String> SUPPORTED_CLASS_NAME_SUFFIXES = Set.of("Config", "Configuration");
+    private static final Set<String> SUPPORTED_CLASS_NAME_SUFFIXES = Set.of("Config", "Configuration");
 
     private static final String QUARKUS_PROPERTY_PREFIX = "quarkus.";
 

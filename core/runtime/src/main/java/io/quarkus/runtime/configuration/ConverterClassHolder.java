@@ -5,8 +5,8 @@ import java.util.Objects;
 import org.eclipse.microprofile.config.spi.Converter;
 
 final class ConverterClassHolder {
-    Class<?> type;
-    Class<? extends Converter<?>> converterType;
+    private final Class<?> type;
+    private final Class<? extends Converter<?>> converterType;
 
     public ConverterClassHolder(Class<?> type, Class<? extends Converter<?>> converterType) {
         this.type = type;
