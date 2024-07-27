@@ -3,6 +3,7 @@ package io.quarkus.runtime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -379,7 +380,7 @@ public class TemplateHtmlBuilder {
             try (InputStream inputStream = classLoader.getResourceAsStream(cssFilePath)) {
                 if (inputStream != null) {
                     // Use a Scanner to read the contents of the CSS file
-                    try (Scanner scanner = new Scanner(inputStream, "UTF-8")) {
+                    try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
                         StringBuilder stringBuilder = new StringBuilder();
                         while (scanner.hasNextLine()) {
                             stringBuilder.append(scanner.nextLine()).append("\n");
