@@ -40,7 +40,7 @@ public interface MetricsFactory {
      */
     default MetricBuilder builder(String name) {
         return builder(name, Type.VENDOR);
-    };
+    }
 
     /**
      * @param name The name of the metric (required)
