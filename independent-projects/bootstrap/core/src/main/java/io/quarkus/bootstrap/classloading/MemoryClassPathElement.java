@@ -128,7 +128,7 @@ public class MemoryClassPathElement extends AbstractClassPathElement {
 
     private static class MemoryUrlStreamHandler extends URLStreamHandler {
         private final byte[] bytes;
-        private long lastModified;
+        private final long lastModified;
 
         public MemoryUrlStreamHandler(byte[] bytes, long lastModified) {
             this.bytes = bytes;
