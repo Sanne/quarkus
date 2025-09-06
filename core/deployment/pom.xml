@@ -143,6 +143,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- TODO: avoid? We have an agent already, we could use that one -->
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>1.17.8</version>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-bom-quarkus-platform-properties</artifactId>
             <type>pom</type>
