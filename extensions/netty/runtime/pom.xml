@@ -68,6 +68,13 @@
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-extension-maven-plugin</artifactId>
+                <configuration>
+                    <devMode>
+                        <jvmOptions>
+                            <sun-misc-unsafe-memory-access>allow</sun-misc-unsafe-memory-access>
+                        </jvmOptions>
+                    </devMode>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
