@@ -3,7 +3,6 @@ package io.quarkus.deployment.builditem;
 import java.util.Objects;
 import java.util.Set;
 
-import io.quarkus.builder.BuildException;
 import io.quarkus.builder.item.MultiBuildItem;
 
 /**
@@ -44,9 +43,9 @@ public final class ModuleOpenBuildItem extends MultiBuildItem {
      * Be careful: the named module might not exist.
      *
      * @return the Module instance corresponding to the opened module name
-     * @throws BuildException if the module cannot be found or constructed
+     * @throws RuntimeException if the module cannot be found or constructed
      */
-    public Module openedModule() throws BuildException {
+    public Module openedModule() {
         return requireModule(openedModuleName);
     }
 
@@ -59,9 +58,9 @@ public final class ModuleOpenBuildItem extends MultiBuildItem {
      * Be careful: the named module might not exist.
      *
      * @return the Module instance corresponding to the opening module name
-     * @throws BuildException if the module cannot be found or constructed
+     * @throws RuntimeException if the module cannot be found or constructed
      */
-    public Module openingModule() throws BuildException {
+    public Module openingModule() {
         return requireModule(openingModuleName);
     }
 
@@ -69,10 +68,10 @@ public final class ModuleOpenBuildItem extends MultiBuildItem {
         return packageNames;
     }
 
-    private static Module requireModule(final String moduleName) throws BuildException {
+    private static Module requireModule(final String moduleName) {
         Module module = ModuleLayer.boot().findModule(moduleName).orElse(null);
         if (module == null) {
-            throw new BuildException("Module '" + moduleName
+            throw new RuntimeException("Module '" + moduleName
                     + "' has been named for an --add-opens instruction, but the module could not be found");
         }
         return module;

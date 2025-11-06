@@ -10,6 +10,7 @@ import org.jboss.logging.Logger;
 import io.quarkus.builder.BuildException;
 import io.quarkus.builder.item.SimpleBuildItem;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
+import io.quarkus.deployment.jvm.JvmModulesReconfigurer;
 
 /**
  * Represents requirements and restrictions on the runtime.
@@ -23,14 +24,18 @@ public final class ResolvedJVMRequirements extends SimpleBuildItem {
 
     private static final Attributes.Name ADD_OPENS_JARATTRIBUTENAME = new Attributes.Name("Add-Opens");
 
-    private final Collection<String> modulesToAddOpens;
+    private final List<ModuleOpenBuildItem> addOpens;
 
     public ResolvedJVMRequirements(final List<ModuleOpenBuildItem> addOpens) throws BuildException {
+        this.addOpens = addOpens;
+    }
+
+    public void renderAddOpensElementToJarManifest(final Attributes attributes) {
         //N.B. in the format of the Add-Opens attribute in the MANIFEST.MF, the "target module" to which things
         //get opened to is implicitly the Jar itself, so it will always point to ALL-UNNAMED:
         //we're ignoring the ModuleOpenBuildItem#openingModuleName in this context.
         //N.B.2: if the app is a module, this Manifest attribute will apparently be ignored!
-        modulesToAddOpens = new TreeSet<>();// Choose a TreeSet as it will sort them, providing a stable order.
+        final Collection<String> modulesToAddOpens = new TreeSet<>(); //Choose a TreeSet as it will sort them, providing a stable order for reproducibility
         for (ModuleOpenBuildItem moduleOpenBuildItem : addOpens) {
             for (String packageName : moduleOpenBuildItem.packageNames()) {
                 //When there are multiple packages to be opened within the same module, the whole definition needs to be repeated; e.g.:
@@ -38,9 +43,6 @@ public final class ResolvedJVMRequirements extends SimpleBuildItem {
                 modulesToAddOpens.add(moduleOpenBuildItem.openedModuleName() + '/' + packageName);
             }
         }
-    }
-
-    public void renderAddOpensElementToJarManifest(final Attributes attributes) {
         if (!modulesToAddOpens.isEmpty()) {
             if (attributes.getValue(ADD_OPENS_JARATTRIBUTENAME) != null) {
                 Logger.getLogger(ResolvedJVMRequirements.class)
@@ -50,4 +52,11 @@ public final class ResolvedJVMRequirements extends SimpleBuildItem {
             attributes.put(ADD_OPENS_JARATTRIBUTENAME, String.join(" ", modulesToAddOpens));
         }
     }
+
+    public void applyJavaModuleConfigurationToRuntime(JvmModulesReconfigurer reconfigurer) {
+        if (addOpens.isEmpty())
+            return;
+        reconfigurer.openJavaModules(addOpens);
+    }
+
 }
