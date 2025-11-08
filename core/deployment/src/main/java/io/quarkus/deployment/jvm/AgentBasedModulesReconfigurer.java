@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.quarkus.changeagent.ClassChangeAgent;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
@@ -15,17 +16,25 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
     private final Instrumentation instrumentation;
 
     /**
-     * Initializes by self-attaching the Byte Buddy agent
-     * to get the Instrumentation instance.
+     * Initializes, attempting to find or load an `Instrumentation` instance:
+     * first we check if the `ClassChangeAgent` is attached - in which case
+     * we can use it.
+     * Otherwise we'll proceed to attaching a new agent leveraging the
+     * self-attaching strategy from Byte Buddy.
      * If an agent cannot be installed, an {@link IllegalStateException} is thrown.
      */
     AgentBasedModulesReconfigurer() {
-        // ByteBuddyAgent.install() attaches its own agent to the current
-        // JVM and returns the Instrumentation instance.
-        try {
-            instrumentation = ByteBuddyAgent.install();
-        } catch (IllegalStateException e) {
-            throw new RuntimeException("Failed to install an agent in the running JVM. Please report this issue.", e);
+        Instrumentation existingIntrumentation = ClassChangeAgent.getInstrumentation();
+        if (existingIntrumentation != null) {
+            this.instrumentation = existingIntrumentation;
+        } else {
+            // ByteBuddyAgent.install() attaches its own agent to the current
+            // JVM and returns the Instrumentation instance.
+            try {
+                instrumentation = ByteBuddyAgent.install();
+            } catch (IllegalStateException e) {
+                throw new RuntimeException("Failed to install an agent in the running JVM. Please report this issue.", e);
+            }
         }
     }
 
