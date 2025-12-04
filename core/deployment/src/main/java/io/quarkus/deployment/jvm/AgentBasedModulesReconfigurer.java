@@ -5,13 +5,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+
+import org.jboss.logging.Logger;
 
 import io.quarkus.changeagent.ClassChangeAgent;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
+
+    private static final Logger logger = Logger.getLogger("io.quarkus.deployment.jvm");
 
     private final Instrumentation instrumentation;
 
@@ -39,16 +44,26 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
     }
 
     @Override
-    public void openJavaModules(List<ModuleOpenBuildItem> addOpens) {
+    public void openJavaModules(List<ModuleOpenBuildItem> addOpens, ModulesClassloaderContext modulesContext) {
         if (addOpens.isEmpty())
             return;
         //We now need to aggregate the list into a differently organized data structure
         HashMap<Module, PerModuleOpenInstructions> aggregateByModule = new HashMap<>();
         for (ModuleOpenBuildItem m : addOpens) {
-            Module openedModule = m.openedModule();
+            Optional<Module> openedModuleOptional = modulesContext.findModule(m.openedModuleName());
+            if (openedModuleOptional.isEmpty()) {
+                warnModuleGetsSkipped(m.openedModuleName(), m);
+                continue;
+            }
+            final Module openedModule = openedModuleOptional.get();
             PerModuleOpenInstructions perModuleOpenInstructions = aggregateByModule.computeIfAbsent(openedModule,
                     k -> new PerModuleOpenInstructions());
-            Module openingModule = m.openingModule();
+            Optional<Module> openingModuleNameOptional = modulesContext.findModule(m.openingModuleName());
+            if (openingModuleNameOptional.isEmpty()) {
+                warnModuleGetsSkipped(m.openingModuleName(), m);
+                continue;
+            }
+            final Module openingModule = openingModuleNameOptional.get();
             for (String packageName : m.packageNames()) {
                 perModuleOpenInstructions.addOpens(packageName, openingModule);
             }
@@ -57,6 +72,10 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
         for (Map.Entry<Module, PerModuleOpenInstructions> entry : aggregateByModule.entrySet()) {
             addOpens(entry.getKey(), entry.getValue().modulesToOpenToByPackage);
         }
+    }
+
+    private static void warnModuleGetsSkipped(String m, ModuleOpenBuildItem addOpens) {
+        logger.warnf("Module %s not found, skipping processing of ModuleOpenBuildItem: %s", m, addOpens);
     }
 
     /**
@@ -92,6 +111,15 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
             final Set<Module> modulesToOpenTo = modulesToOpenToByPackage.computeIfAbsent(packageName, k -> new HashSet<>());
             modulesToOpenTo.add(openingModule);
         }
+    }
+
+    private static Module requireModule(final String moduleName) {
+        Module module = ModuleLayer.boot().findModule(moduleName).orElse(null);
+        if (module == null) {
+            throw new RuntimeException("Module '" + moduleName
+                    + "' has been named for an --add-opens instruction, but the module could not be found");
+        }
+        return module;
     }
 
 }

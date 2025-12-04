@@ -29,6 +29,7 @@ public class ModulesOpenedTestEndpoint extends HttpServlet {
             testPassed = true;
         } catch (Exception e) {
             testPassed = false;
+            e.printStackTrace();
             errorMessage = e.getMessage();
         }
         if (testPassed) {

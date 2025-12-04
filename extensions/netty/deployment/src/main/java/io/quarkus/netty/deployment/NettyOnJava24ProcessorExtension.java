@@ -1,6 +1,5 @@
 package io.quarkus.netty.deployment;
 
-import io.netty.util.Version;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageSystemPropertyBuildItem;
@@ -26,7 +25,7 @@ public class NettyOnJava24ProcessorExtension {
 
     @BuildStep
     ModuleOpenBuildItem openModules() {
-        return new ModuleOpenBuildItem("java.base", Version.class.getModule(), "java.nio", "jdk.internal.misc");
+        return new ModuleOpenBuildItem("java.base", ModuleOpenBuildItem.ALL_UNNAMED, "java.nio", "jdk.internal.misc");
     }
 
 }

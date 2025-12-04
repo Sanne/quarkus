@@ -13,7 +13,7 @@ import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
  */
 public interface JvmModulesReconfigurer {
 
-    void openJavaModules(List<ModuleOpenBuildItem> addOpens);
+    void openJavaModules(List<ModuleOpenBuildItem> addOpens, ModulesClassloaderContext referenceClassloader);
 
     /**
      * Creates a new instance of {@link JvmModulesReconfigurer}.

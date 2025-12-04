@@ -3,9 +3,9 @@ package io.quarkus.deployment.steps;
 import java.util.List;
 
 import io.quarkus.builder.BuildException;
-import io.quarkus.deployment.ResolvedJVMRequirements;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
+import io.quarkus.deployment.jvm.ResolvedJVMRequirements;
 
 /**
  * Build step that resolves and aggregates JVM requirements for the Quarkus application.

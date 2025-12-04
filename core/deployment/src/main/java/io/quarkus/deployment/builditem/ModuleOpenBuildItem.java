@@ -13,21 +13,32 @@ import io.quarkus.builder.item.MultiBuildItem;
  */
 public final class ModuleOpenBuildItem extends MultiBuildItem {
 
+    /**
+     * Use this specific constant to open a module to "the" unname module of the App.
+     * There are normally multiple "unnamed modules" in the JVM; picking this specific name
+     * in the context of this build item requests that the specific unnamed module of the
+     * classloader running Quarkus will be instrumented with the matching requests.
+     * When new classloaders are defined (e.g. running in live-reload mode), the rules
+     * will be applied again.
+     */
+    public static final String ALL_UNNAMED = "ALL-UNNAMED";
+
     private final String openedModuleName;
-    private final Module openingModule;
+    private final String openingModuleName;
     private final Set<String> packageNames;
 
     /**
      * Create a new ModuleOpenBuildItem instance.
      *
-     * @param openedModuleName The module which needs to be opened.
-     * @param openingModule The module which is being granted access.
+     * @param openedModuleName The name of the module which needs to be opened.
+     * @param openingModuleName The name of the module which is being granted access.
      * @param packageNames The packages which are being opened. At least one must be specified.
      */
-    public ModuleOpenBuildItem(String openedModuleName, Module openingModule, String... packageNames) {
-        //Validating for actual module existence is deferred
+    public ModuleOpenBuildItem(String openedModuleName, String openingModuleName, String... packageNames) {
+        //Validating for actual module existence is deferred: such aspects are classloader specific,
+        //and these rules might need to be applied on a variety of classloaders.
         this.openedModuleName = Objects.requireNonNull(openedModuleName);
-        this.openingModule = Objects.requireNonNull(openingModule);
+        this.openingModuleName = Objects.requireNonNull(openingModuleName);
         this.packageNames = Set.of(packageNames);
         if (packageNames.length == 0) {
             throw new IllegalArgumentException("At least one package name must be specified");
@@ -38,35 +49,21 @@ public final class ModuleOpenBuildItem extends MultiBuildItem {
         return openedModuleName;
     }
 
-    /**
-     * Convenience method to load the module matching the opened module name.
-     * Be careful: the named module might not exist.
-     *
-     * @return the Module instance corresponding to the opened module name
-     * @throws RuntimeException if the module cannot be found or constructed
-     */
-    public Module openedModule() {
-        return requireModule(openedModuleName);
-    }
-
-    /**
-     * @return the Module instance corresponding to the opening module name
-     */
-    public Module openingModule() {
-        return openingModule;
+    public String openingModuleName() {
+        return openingModuleName;
     }
 
     public Set<String> packageNames() {
         return packageNames;
     }
 
-    private static Module requireModule(final String moduleName) {
-        Module module = ModuleLayer.boot().findModule(moduleName).orElse(null);
-        if (module == null) {
-            throw new RuntimeException("Module '" + moduleName
-                    + "' has been named for an --add-opens instruction, but the module could not be found");
-        }
-        return module;
+    @Override
+    public String toString() {
+        return "ModuleOpenBuildItem{" +
+                "openedModule='" + openedModuleName + '\'' +
+                ", openingModule='" + openingModuleName + '\'' +
+                ", packages=" + packageNames +
+                '}';
     }
 
 }

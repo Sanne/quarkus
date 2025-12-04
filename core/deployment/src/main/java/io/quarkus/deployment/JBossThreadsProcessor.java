@@ -1,7 +1,5 @@
 package io.quarkus.deployment;
 
-import org.jboss.threads.JBossThread;
-
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
@@ -17,10 +15,8 @@ public class JBossThreadsProcessor {
 
     @BuildStep
     ModuleOpenBuildItem allowClearThreadLocals() {
-        // Since JDK 24, JBoss Threads needs --add-opens java.base/java.lang=org.jboss.threads to handle org.jboss.JDKSpecific.ThreadAccess.clearThreadLocals()
-        //*however* the JBoss Threads library is currently not used as a module, so let's get the Module reference which should work more generally:
-        final Module jbossThreadsModule = JBossThread.class.getModule();
-        return new ModuleOpenBuildItem("java.base", jbossThreadsModule, "java.lang");
+        // Since JDK 24, JBoss Threads needs `--add-opens java.base/java.lang=org.jboss.threads` to handle org.jboss.JDKSpecific.ThreadAccess.clearThreadLocals()
+        return new ModuleOpenBuildItem("java.base", ModuleOpenBuildItem.ALL_UNNAMED, "java.lang");
     }
 
 }

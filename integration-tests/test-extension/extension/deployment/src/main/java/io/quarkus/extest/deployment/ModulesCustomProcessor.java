@@ -7,6 +7,6 @@ public class ModulesCustomProcessor {
 
     @BuildStep
     ModuleOpenBuildItem openModules() {
-        return new ModuleOpenBuildItem("java.base", ModulesCustomProcessor.class.getModule(), "java.util");
+        return new ModuleOpenBuildItem("java.base", ModuleOpenBuildItem.ALL_UNNAMED, "java.util");
     }
 }

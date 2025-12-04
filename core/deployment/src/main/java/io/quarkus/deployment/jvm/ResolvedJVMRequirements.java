@@ -1,4 +1,4 @@
-package io.quarkus.deployment;
+package io.quarkus.deployment.jvm;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,10 +7,10 @@ import java.util.jar.Attributes;
 
 import org.jboss.logging.Logger;
 
+import io.quarkus.bootstrap.classloading.QuarkusClassLoader;
 import io.quarkus.builder.BuildException;
 import io.quarkus.builder.item.SimpleBuildItem;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
-import io.quarkus.deployment.jvm.JvmModulesReconfigurer;
 
 /**
  * Represents requirements and restrictions on the runtime.
@@ -53,10 +53,12 @@ public final class ResolvedJVMRequirements extends SimpleBuildItem {
         }
     }
 
-    public void applyJavaModuleConfigurationToRuntime(JvmModulesReconfigurer reconfigurer) {
+    public void applyJavaModuleConfigurationToRuntime(JvmModulesReconfigurer reconfigurer,
+            QuarkusClassLoader referenceClassloader) {
         if (addOpens.isEmpty())
             return;
-        reconfigurer.openJavaModules(addOpens);
+        ModulesClassloaderContext context = new ModulesClassloaderContext(referenceClassloader);
+        reconfigurer.openJavaModules(addOpens, context);
     }
 
 }

@@ -1,18 +1,23 @@
 package io.quarkus.deployment.jvm;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.jboss.logging.Logger;
 
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 
 /**
  * A concrete implementation of {@link JvmModulesReconfigurer} designed to reconfigure
  * JVM module restrictions using the direct API calls available in `jdk.internal.module`.
- * Methods in this package nore normally not accessible: to compile this class we need to
+ * Methods in this package are normally not accessible: to compile this class we need to
  * declare the export --add-exports=java.base/jdk.internal.module=ALL-UNNAMED to javac,
  * and this same export is also required at runtime; otherwise an 'java.lang.IllegalAccessError'
  * will be thrown when these methods are invoked.
  */
 final class DirectExportedModulesAPIModulesReconfigurer implements JvmModulesReconfigurer {
+
+    private static final Logger logger = Logger.getLogger("io.quarkus.deployment.jvm");
 
     DirectExportedModulesAPIModulesReconfigurer() {
         //We need to throw a RuntimeException at construction time if the openJavaModules method is going to fail,
@@ -21,12 +26,28 @@ final class DirectExportedModulesAPIModulesReconfigurer implements JvmModulesRec
     }
 
     @Override
-    public void openJavaModules(List<ModuleOpenBuildItem> addOpens) {
+    public void openJavaModules(List<ModuleOpenBuildItem> addOpens, ModulesClassloaderContext modulesContext) {
         for (ModuleOpenBuildItem e : addOpens) {
+            Optional<Module> optionalOpenedModule = modulesContext.findModule(e.openedModuleName());
+            if (optionalOpenedModule.isEmpty()) {
+                warnModuleGetsSkipped(e.openedModuleName(), e);
+                continue;
+            }
+            final Module openedModule = optionalOpenedModule.get();
+            Optional<Module> optionalOpeningModule = modulesContext.findModule(e.openingModuleName());
+            if (optionalOpeningModule.isEmpty()) {
+                warnModuleGetsSkipped(e.openingModuleName(), e);
+                continue;
+            }
+            final Module openingModule = optionalOpeningModule.get();
             for (String packageName : e.packageNames()) {
-                jdk.internal.module.Modules.addOpens(e.openedModule(), packageName, e.openingModule());
+                jdk.internal.module.Modules.addOpens(openedModule, packageName, openingModule);
             }
         }
+    }
+
+    private static void warnModuleGetsSkipped(String m, ModuleOpenBuildItem addOpens) {
+        logger.warnf("Module %s not found, skipping processing of ModuleOpenBuildItem: %s", m, addOpens);
     }
 
     /**

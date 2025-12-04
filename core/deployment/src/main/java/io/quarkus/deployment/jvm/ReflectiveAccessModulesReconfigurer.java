@@ -6,6 +6,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.util.List;
+import java.util.Optional;
 
 import org.jboss.logging.Logger;
 
@@ -26,25 +27,39 @@ import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
  */
 final class ReflectiveAccessModulesReconfigurer implements JvmModulesReconfigurer {
 
-    private static final Logger log = Logger.getLogger(ReflectiveAccessModulesReconfigurer.class);
+    private static final Logger logger = Logger.getLogger(ReflectiveAccessModulesReconfigurer.class);
 
     private final MethodHandle implAddOpensHandle;
 
-    protected ReflectiveAccessModulesReconfigurer() {
+    ReflectiveAccessModulesReconfigurer() {
         implAddOpensHandle = methodHandleInit();
     }
 
     @Override
-    public void openJavaModules(List<ModuleOpenBuildItem> addOpens) {
+    public void openJavaModules(List<ModuleOpenBuildItem> addOpens, ModulesClassloaderContext modulesContext) {
         if (addOpens.isEmpty())
             return;
         for (ModuleOpenBuildItem m : addOpens) {
-            Module openedModule = m.openedModule();
-            Module openingModule = m.openingModule();
+            Optional<Module> optionalOpenedModule = modulesContext.findModule(m.openedModuleName());
+            if (optionalOpenedModule.isEmpty()) {
+                warnModuleGetsSkipped(m.openedModuleName(), m);
+                continue;
+            }
+            final Module openedModule = optionalOpenedModule.get();
+            Optional<Module> optionalOpeningModule = modulesContext.findModule(m.openingModuleName());
+            if (optionalOpeningModule.isEmpty()) {
+                warnModuleGetsSkipped(m.openingModuleName(), m);
+                continue;
+            }
+            final Module openingModule = optionalOpeningModule.get();
             for (String packageName : m.packageNames()) {
                 addOpens(openedModule, packageName, openingModule);
             }
         }
+    }
+
+    private static void warnModuleGetsSkipped(String m, ModuleOpenBuildItem addOpens) {
+        logger.warnf("Module %s not found, skipping processing of ModuleOpenBuildItem: %s", m, addOpens);
     }
 
     /**
@@ -74,7 +89,7 @@ final class ReflectiveAccessModulesReconfigurer implements JvmModulesReconfigure
                     methodType // Signature of the method
             );
 
-            log.debug("Successfully acquired MethodHandle for implAddOpens.");
+            logger.debug("Successfully acquired MethodHandle for implAddOpens.");
             return handle;
 
         } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InaccessibleObjectException e) {
@@ -93,7 +108,7 @@ final class ReflectiveAccessModulesReconfigurer implements JvmModulesReconfigure
     private void addOpens(Module sourceModule, String packageName, Module targetModule) {
         try {
             implAddOpensHandle.invokeExact(sourceModule, packageName, targetModule);
-            log.debugf("Successfully opened module %s/%s to %s",
+            logger.debugf("Successfully opened module %s/%s to %s",
                     sourceModule.getName(), packageName, targetModule.isNamed() ? targetModule.getName() : "UNNAMED");
         } catch (Throwable e) {
             // MethodHandle.invokeExact throws Throwable

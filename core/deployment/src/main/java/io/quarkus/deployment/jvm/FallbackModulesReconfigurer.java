@@ -18,11 +18,11 @@ final class FallbackModulesReconfigurer implements JvmModulesReconfigurer {
     private static final Logger logger = Logger.getLogger("io.quarkus.deployment.jvm");
 
     @Override
-    public void openJavaModules(final List<ModuleOpenBuildItem> addOpens) {
+    public void openJavaModules(final List<ModuleOpenBuildItem> addOpens, ModulesClassloaderContext ignored) {
         for (ModuleOpenBuildItem addOpen : addOpens) {
             logger.warnf("Could not automatically install and add-opens for module %s/%s, to module %s",
-                    addOpen.openedModule().getName(), addOpen.packageNames(),
-                    addOpen.openingModule().isNamed() ? addOpen.openingModule().getName() : "UNNAMED");
+                    addOpen.openedModuleName(), addOpen.packageNames(),
+                    addOpen.openingModuleName());
         }
     }
 
