@@ -193,7 +193,7 @@
                 <configuration>
                     <environmentVariables>
                         <!-- to verify that MAVEN_OPTS filtering works in BootstrapMavenOptions -->
-                        <MAVEN_OPTS>--add-opens java.base/java.util=ALL-UNNAMED</MAVEN_OPTS>
+                        <MAVEN_OPTS>--add-opens=java.base/java.util=ALL-UNNAMED</MAVEN_OPTS>
                     </environmentVariables>
                 </configuration>
             </plugin>
