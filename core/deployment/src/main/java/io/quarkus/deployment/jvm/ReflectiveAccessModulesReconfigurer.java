@@ -8,8 +8,6 @@ import java.lang.reflect.InaccessibleObjectException;
 import java.util.List;
 import java.util.Optional;
 
-import org.jboss.logging.Logger;
-
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 
 /**
@@ -25,9 +23,7 @@ import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
  * - This approach bypasses strict module system rules, enabling dynamic adjustments to module access at runtime:
  * it's meant as a convenience during development, Quarkus does not use such techniques in production mode.
  */
-final class ReflectiveAccessModulesReconfigurer implements JvmModulesReconfigurer {
-
-    private static final Logger logger = Logger.getLogger(ReflectiveAccessModulesReconfigurer.class);
+final class ReflectiveAccessModulesReconfigurer extends AbstractModulesReconfigurer implements JvmModulesReconfigurer {
 
     private final MethodHandle implAddOpensHandle;
 
@@ -56,10 +52,6 @@ final class ReflectiveAccessModulesReconfigurer implements JvmModulesReconfigure
                 addOpens(openedModule, packageName, openingModule);
             }
         }
-    }
-
-    private static void warnModuleGetsSkipped(String m, ModuleOpenBuildItem addOpens) {
-        logger.warnf("Module %s not found, skipping processing of ModuleOpenBuildItem: %s", m, addOpens);
     }
 
     /**

@@ -3,8 +3,6 @@ package io.quarkus.deployment.jvm;
 import java.util.List;
 import java.util.Optional;
 
-import org.jboss.logging.Logger;
-
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 
 /**
@@ -15,9 +13,7 @@ import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
  * and this same export is also required at runtime; otherwise an 'java.lang.IllegalAccessError'
  * will be thrown when these methods are invoked.
  */
-final class DirectExportedModulesAPIModulesReconfigurer implements JvmModulesReconfigurer {
-
-    private static final Logger logger = Logger.getLogger("io.quarkus.deployment.jvm");
+final class DirectExportedModulesAPIModulesReconfigurer extends AbstractModulesReconfigurer implements JvmModulesReconfigurer {
 
     DirectExportedModulesAPIModulesReconfigurer() {
         //We need to throw a RuntimeException at construction time if the openJavaModules method is going to fail,
@@ -46,13 +42,9 @@ final class DirectExportedModulesAPIModulesReconfigurer implements JvmModulesRec
         }
     }
 
-    private static void warnModuleGetsSkipped(String m, ModuleOpenBuildItem addOpens) {
-        logger.warnf("Module %s not found, skipping processing of ModuleOpenBuildItem: %s", m, addOpens);
-    }
-
     /**
      * This method will throw a RuntimeException if we're not allowed to invoke methods on the internal API:
-     * useful to validate.
+     * useful to validate this particular approach.
      */
     private static void testMethodAccessOrFail() {
         // "null" is not a valid argument for the following method: we use it intentionally to check for being allowed to invoke it,

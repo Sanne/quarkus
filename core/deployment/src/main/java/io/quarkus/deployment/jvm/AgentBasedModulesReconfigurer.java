@@ -1,22 +1,21 @@
 package io.quarkus.deployment.jvm;
 
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import org.jboss.logging.Logger;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.quarkus.changeagent.ClassChangeAgent;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
-final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
-
-    private static final Logger logger = Logger.getLogger("io.quarkus.deployment.jvm");
+final class AgentBasedModulesReconfigurer extends AbstractModulesReconfigurer implements JvmModulesReconfigurer {
 
     private final Instrumentation instrumentation;
 
@@ -29,9 +28,9 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
      * If an agent cannot be installed, an {@link IllegalStateException} is thrown.
      */
     AgentBasedModulesReconfigurer() {
-        Instrumentation existingIntrumentation = ClassChangeAgent.getInstrumentation();
-        if (existingIntrumentation != null) {
-            this.instrumentation = existingIntrumentation;
+        Instrumentation existingInstrumentation = ClassChangeAgent.getInstrumentation();
+        if (existingInstrumentation != null) {
+            this.instrumentation = existingInstrumentation;
         } else {
             // ByteBuddyAgent.install() attaches its own agent to the current
             // JVM and returns the Instrumentation instance.
@@ -41,12 +40,44 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
                 throw new RuntimeException("Failed to install an agent in the running JVM. Please report this issue.", e);
             }
         }
+        if (logger.isDebugEnabled()) {
+            instrumentation.addTransformer(new UnnamedModulesTracker());
+        }
+    }
+
+    private static void reportUnnamedModulesSet(Instrumentation inst) {
+        if (!logger.isDebugEnabled()) {
+            //All following work is only useful to emit a comprehensive debugging report
+            return;
+        }
+        Set<Module> unnamedModules = new HashSet<>();
+
+        // Always add the Boot Loader's unnamed module (for -Xbootclasspath/a):
+        // there isn't a ClassLoader object for Boot, but we can get it via the Layer.
+        unnamedModules.add(ClassLoader.getSystemClassLoader().getUnnamedModule());
+
+        // Iterate all loaded classes to find other ClassLoaders (expensive!)
+        Class<?>[] allClasses = inst.getAllLoadedClasses();
+
+        for (Class<?> clazz : allClasses) {
+            ClassLoader loader = clazz.getClassLoader();
+
+            // If loader is null, it's the Boot Loader (already handled)
+            if (loader != null) {
+                Module m = loader.getUnnamedModule();
+                unnamedModules.add(m);
+            }
+        }
+
+        long pid = ProcessHandle.current().pid();
+        logger.debugf("Set of unnamed modules currently defined in process with pid=%d: %s", pid, unnamedModules);
     }
 
     @Override
     public void openJavaModules(List<ModuleOpenBuildItem> addOpens, ModulesClassloaderContext modulesContext) {
         if (addOpens.isEmpty())
             return;
+        reportUnnamedModulesSet(this.instrumentation);//Provides very useful diagnostics
         //We now need to aggregate the list into a differently organized data structure
         HashMap<Module, PerModuleOpenInstructions> aggregateByModule = new HashMap<>();
         for (ModuleOpenBuildItem m : addOpens) {
@@ -74,10 +105,6 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
         }
     }
 
-    private static void warnModuleGetsSkipped(String m, ModuleOpenBuildItem addOpens) {
-        logger.warnf("Module %s not found, skipping processing of ModuleOpenBuildItem: %s", m, addOpens);
-    }
-
     /**
      * Uses the MethodHandle to open a package.
      *
@@ -85,6 +112,10 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
      * @param openInstructions The map of packages / target modules to open to
      */
     private void addOpens(Module sourceModule, Map<String, Set<Module>> openInstructions) {
+        if (logger.isDebugEnabled()) {
+            openInstructions.forEach(
+                    (pkg, modules) -> logger.debugf("Opening package %s of %s to modules %s", pkg, sourceModule, modules));
+        }
         try {
             // We are redefining the target module, adding a new "open"
             // rule for it.
@@ -113,13 +144,29 @@ final class AgentBasedModulesReconfigurer implements JvmModulesReconfigurer {
         }
     }
 
-    private static Module requireModule(final String moduleName) {
-        Module module = ModuleLayer.boot().findModule(moduleName).orElse(null);
-        if (module == null) {
-            throw new RuntimeException("Module '" + moduleName
-                    + "' has been named for an --add-opens instruction, but the module could not be found");
-        }
-        return module;
-    }
+    /**
+     * This isn't going to transform any class, but we leverage the existing agent
+     * and register as a callback to provide useful diagnostics: we can detect new
+     * unnamed modules being created and log them.
+     * Obviously this has a cost, so register this only when the matching log level is enabled.
+     * N.B. we can use this approach only when having an agent: other implementations
+     * of JvmModulesReconfigurer will be more limited.
+     */
+    private static class UnnamedModulesTracker implements ClassFileTransformer {
 
+        private final Set<Module> knownUnnamedModules = new CopyOnWriteArraySet<>();
+
+        @Override
+        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+                ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+            if (loader != null) {
+                Module m = loader.getUnnamedModule();
+                // Check if this module is one of the "known" ones from your bootstrap list
+                if (knownUnnamedModules.add(m)) {
+                    logger.debugf("New unnamed module detected: %s", m);
+                }
+            }
+            return null;
+        }
+    }
 }

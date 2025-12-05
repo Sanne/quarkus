@@ -59,6 +59,7 @@ public class StartupActionImpl implements StartupAction {
     private final String mainClassName;
     private final String applicationClassName;
     private final Map<String, String> devServicesProperties;
+    private final ResolvedJVMRequirements jvmRequirements;
     private volatile boolean devServicesStarted = false;
     private final List<DevServicesResultBuildItem> devServicesResults;
     private final List<DevServicesCustomizerBuildItem> devServicesCustomizers;
@@ -104,8 +105,13 @@ public class StartupActionImpl implements StartupAction {
         this.runtimeClassLoader = runtimeClassLoader;
         runtimeClassLoader.setStartupAction(this);
         // Adjust JVM module requirements for this app
-        final ResolvedJVMRequirements jvmRequirements = buildResult.consume(ResolvedJVMRequirements.class);
-        jvmRequirements.applyJavaModuleConfigurationToRuntime(jvmModulesReconfigurer, runtimeClassLoader);
+        jvmRequirements = buildResult.consume(ResolvedJVMRequirements.class);
+        applyModuleConfigurationToClassloader(runtimeClassLoader);
+    }
+
+    @Override
+    public void applyModuleConfigurationToClassloader(ClassLoader classLoader) {
+        jvmRequirements.applyJavaModuleConfigurationToRuntime(jvmModulesReconfigurer, classLoader);
     }
 
     /**

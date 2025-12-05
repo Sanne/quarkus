@@ -7,7 +7,6 @@ import java.util.jar.Attributes;
 
 import org.jboss.logging.Logger;
 
-import io.quarkus.bootstrap.classloading.QuarkusClassLoader;
 import io.quarkus.builder.BuildException;
 import io.quarkus.builder.item.SimpleBuildItem;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
@@ -54,7 +53,7 @@ public final class ResolvedJVMRequirements extends SimpleBuildItem {
     }
 
     public void applyJavaModuleConfigurationToRuntime(JvmModulesReconfigurer reconfigurer,
-            QuarkusClassLoader referenceClassloader) {
+            ClassLoader referenceClassloader) {
         if (addOpens.isEmpty())
             return;
         ModulesClassloaderContext context = new ModulesClassloaderContext(referenceClassloader);

@@ -29,7 +29,6 @@ public class ModulesOpenedTestEndpoint extends HttpServlet {
             testPassed = true;
         } catch (Exception e) {
             testPassed = false;
-            e.printStackTrace();
             errorMessage = e.getMessage();
         }
         if (testPassed) {
@@ -44,17 +43,17 @@ public class ModulesOpenedTestEndpoint extends HttpServlet {
         ArrayList<String> list = new ArrayList<>();
         list.add(SOME_DATA);
 
-        // This is not public API, so we need reflection to see it.
+        // Let's try some cheeky operation which shouldn't be allowed:
         Field internalArray = ArrayList.class.getDeclaredField("elementData");
 
-        // This will fail if "--add-opens=java.base/java.util=ALL-UNNAMED", hasn't been set!
+        // .. and specifically this will fail if "--add-opens=java.base/java.util=ALL-UNNAMED", hasn't been set:
         try {
             internalArray.setAccessible(true);
         } catch (InaccessibleObjectException e) {
             throw new RuntimeException("Test Failed: Module java.base/java.util is NOT open! ", e);
         }
 
-        // Check that it worked:
+        // Check that we can indeed read it:
         Object[] data = (Object[]) internalArray.get(list);
         if (!data[0].equals(SOME_DATA)) {
             throw new RuntimeException("Test Failed: Internal array content is not as expected!");

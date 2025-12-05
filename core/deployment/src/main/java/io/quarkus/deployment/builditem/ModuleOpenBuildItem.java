@@ -6,7 +6,7 @@ import java.util.Set;
 import io.quarkus.builder.item.MultiBuildItem;
 
 /**
- * This will generate the equivalent of "--add-opens [openedModule/package(s)]=[openingModule]" for
+ * This will generate the equivalent of "--add-opens=[openedModule/package(s)]=[openingModule]" for
  * all runners of the generated application.
  * Some limitations apply which will depend on the launch mode of Quarkus; specifically, when
  * generating a runnable Jar we can only open a module to ALL-UNNAMED.
@@ -59,6 +59,7 @@ public final class ModuleOpenBuildItem extends MultiBuildItem {
 
     @Override
     public String toString() {
+        //Used for diagnostic logging purposes
         return "ModuleOpenBuildItem{" +
                 "openedModule='" + openedModuleName + '\'' +
                 ", openingModule='" + openingModuleName + '\'' +

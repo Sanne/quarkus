@@ -1,22 +1,23 @@
 package io.quarkus.deployment.jvm;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.quarkus.bootstrap.classloading.QuarkusClassLoader;
 import io.quarkus.deployment.builditem.ModuleOpenBuildItem;
 
+/**
+ * Context for looking up modules in a classloader:
+ * encapsulates code dealing with the module layers,
+ * and provides a cache for the modules found.
+ */
 final class ModulesClassloaderContext {
 
-    private final QuarkusClassLoader referenceClassloader;
     private final Optional<Module> classloaderUnnamedModule; //The unnamed module for this reference classloader
     private final ModuleLayer currentLayer; //The module layer for this reference classloader
     private final ConcurrentHashMap<String, Optional<Module>> moduleCache = new ConcurrentHashMap<>();
 
-    public ModulesClassloaderContext(final QuarkusClassLoader classloader) {
-        this.referenceClassloader = Objects.requireNonNull(classloader);
-        Module unnamedModule = referenceClassloader.getUnnamedModule();
+    public ModulesClassloaderContext(final ClassLoader classloader) {
+        Module unnamedModule = classloader.getUnnamedModule();
         this.classloaderUnnamedModule = Optional.of(unnamedModule);
         this.currentLayer = currentLayer(unnamedModule);
     }
@@ -35,4 +36,5 @@ final class ModulesClassloaderContext {
         }
         return layer;
     }
+
 }
