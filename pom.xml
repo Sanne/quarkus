@@ -208,6 +208,7 @@
                 <forbiddenapis-maven-plugin.phase>none</forbiddenapis-maven-plugin.phase>
                 <skipCodestartValidation>true</skipCodestartValidation>
                 <truststore.skip>true</truststore.skip>
+                <jdeps.restrict.skip>true</jdeps.restrict.skip> <!-- jdeps-restrict-maven-plugin -->
             </properties>
             <build>
                 <defaultGoal>clean install</defaultGoal>
@@ -230,6 +231,7 @@
                 <forbiddenapis.skip>true</forbiddenapis.skip> <!-- forbidden-apis maven plugin -->
                 <skipCodestartValidation>true</skipCodestartValidation>
                 <truststore.skip>true</truststore.skip>
+                <jdeps.restrict.skip>true</jdeps.restrict.skip> <!-- jdeps-restrict-maven-plugin -->
             </properties>
             <build>
                 <defaultGoal>clean install</defaultGoal>
@@ -255,6 +257,7 @@
                 <jbang.skip>true</jbang.skip> <!-- jbang-maven-plugin -->
                 <forbiddenapis.skip>true</forbiddenapis.skip> <!-- forbidden-apis maven plugin -->
                 <truststore.skip>true</truststore.skip>
+                <jdeps.restrict.skip>true</jdeps.restrict.skip> <!-- jdeps-restrict-maven-plugin -->
             </properties>
         </profile>
         <profile>
