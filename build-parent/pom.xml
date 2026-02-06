@@ -16,6 +16,9 @@
     <packaging>pom</packaging>
 
     <properties>
+        <!-- jdeps-restrict plugin: enabled by default, skipped with -Pquickly -->
+        <jdeps.restrict.skip>false</jdeps.restrict.skip>
+
         <!-- Maven plugin versions -->
 
         <!-- These properties are needed in order for them to be resolvable by the generated projects -->
@@ -684,6 +687,48 @@
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>2.44.4</version>
                 </plugin>
+                <plugin>
+                    <groupId>io.scryball</groupId>
+                    <artifactId>jdeps-restrict-maven-plugin</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- These can be checked on the entire project by running mvn verify -DskipTests -DskipITs -->
+                        <allowedModules>
+                            <module>java.base</module>
+                            <module>java.compiler</module>
+                            <module>java.desktop</module>
+                            <module>java.instrument</module>
+                            <module>java.logging</module>
+                            <module>java.management</module>
+                            <module>java.naming</module>
+                            <module>java.net.http</module>
+                            <module>java.security.jgss</module>
+                            <module>java.security.sasl</module>
+                            <module>java.sql</module>
+                            <module>java.sql.rowset</module>
+                            <module>java.transaction.xa</module>
+                            <module>java.xml</module>
+                            <module>java.xml.crypto</module>
+                            <module>jdk.attach</module>
+                            <module>jdk.compiler</module>
+                            <module>jdk.httpserver</module>
+                            <module>jdk.jfr</module>
+                            <module>jdk.management</module>
+                            <module>jdk.net</module>
+                            <module>jdk.unsupported</module>
+                            <module>java.rmi</module>
+                        </allowedModules>
+                        <!-- Skip by default, enable via -Djdeps.skip=false -->
+                        <skip>${jdeps.restrict.skip}</skip>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -765,6 +810,10 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.scryball</groupId>
+                        <artifactId>jdeps-restrict-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
