@@ -12,8 +12,6 @@ import jakarta.interceptor.InvocationContext;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.InjectableContext;
 import io.quarkus.arc.ManagedContext;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
 
 @Interceptor
 @ActivateRequestContext
@@ -24,9 +22,9 @@ public class ActivateRequestContextInterceptor {
     Object aroundInvoke(InvocationContext ctx) throws Exception {
         switch (ReactiveType.valueOf(ctx.getMethod())) {
             case UNI:
-                return invokeUni(ctx);
+                return MutinyActivateRequestContext.invokeUni(ctx);
             case MULTI:
-                return invokeMulti(ctx);
+                return MutinyActivateRequestContext.invokeMulti(ctx);
             case STAGE:
                 return invokeStage(ctx);
             default:
@@ -61,60 +59,6 @@ public class ActivateRequestContextInterceptor {
             return (CompletionStage<?>) ctx.proceed();
         } catch (Throwable t) {
             return CompletableFuture.failedStage(t);
-        }
-    }
-
-    private Multi<?> invokeMulti(InvocationContext ctx) {
-        return Multi.createFrom().deferred(() -> {
-            ManagedContext requestContext = Arc.requireContainer().requestContext();
-            if (requestContext.isActive()) {
-                return proceedWithMulti(ctx);
-            }
-
-            return Multi.createFrom().deferred(() -> {
-                requestContext.activate();
-                InjectableContext.ContextState state = requestContext.getState();
-                return proceedWithMulti(ctx)
-                        .onTermination().invoke(() -> {
-                            requestContext.destroy(state);
-                            requestContext.deactivate();
-                        });
-            });
-        });
-    }
-
-    private Multi<?> proceedWithMulti(InvocationContext ctx) {
-        try {
-            return (Multi<?>) ctx.proceed();
-        } catch (Throwable t) {
-            return Multi.createFrom().failure(t);
-        }
-    }
-
-    private Uni<?> invokeUni(InvocationContext ctx) {
-        return Uni.createFrom().deferred(() -> {
-            ManagedContext requestContext = Arc.requireContainer().requestContext();
-            if (requestContext.isActive()) {
-                return proceedWithUni(ctx);
-            }
-
-            return Uni.createFrom().deferred(() -> {
-                requestContext.activate();
-                InjectableContext.ContextState state = requestContext.getState();
-                return proceedWithUni(ctx)
-                        .eventually(() -> {
-                            requestContext.destroy(state);
-                            requestContext.deactivate();
-                        });
-            });
-        });
-    }
-
-    private Uni<?> proceedWithUni(InvocationContext ctx) {
-        try {
-            return (Uni<?>) ctx.proceed();
-        } catch (Throwable t) {
-            return Uni.createFrom().failure(t);
         }
     }
 

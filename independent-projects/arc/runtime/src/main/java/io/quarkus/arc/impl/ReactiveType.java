@@ -4,32 +4,17 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-
 /**
  * A method reactive returned type.
  */
 public enum ReactiveType {
 
-    /**
-     * The method returns a non recognised reactive type
-     */
     NON_REACTIVE(false, null),
 
-    /**
-     * The method returns a {@link Uni}
-     */
-    UNI(true, Uni.class),
+    UNI(true, safeLoadClass("io.smallrye.mutiny.Uni")),
 
-    /**
-     * The method returns a {@link Multi}
-     */
-    MULTI(true, Multi.class),
+    MULTI(true, safeLoadClass("io.smallrye.mutiny.Multi")),
 
-    /**
-     * The method returns a {@link CompletionStage}
-     */
     STAGE(true, CompletionStage.class);
 
     private final boolean reactive;
@@ -57,5 +42,15 @@ public enum ReactiveType {
         }
 
         return NON_REACTIVE;
+    }
+
+    // Mutiny is an optional dependency — use Class.forName to avoid NoClassDefFoundError
+    // when Mutiny is not on the classpath (e.g. CLI apps, non-reactive applications)
+    private static Class<?> safeLoadClass(String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 }

@@ -33,6 +33,7 @@
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

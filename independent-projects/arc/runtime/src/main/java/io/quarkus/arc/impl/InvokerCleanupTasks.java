@@ -10,9 +10,6 @@ import jakarta.enterprise.context.spi.CreationalContext;
 
 import org.jboss.logging.Logger;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-
 public class InvokerCleanupTasks implements Consumer<Runnable> {
     private static final Logger LOG = Logger.getLogger(InvokerCleanupTasks.class);
 
@@ -54,13 +51,5 @@ public class InvokerCleanupTasks implements Consumer<Runnable> {
             }
         });
         return result;
-    }
-
-    public static <T> Uni<T> deferRelease(CreationalContext<?> cc, Uni<T> uni) {
-        return uni.onTermination().invoke(cc::release);
-    }
-
-    public static <T> Multi<T> deferRelease(CreationalContext<?> cc, Multi<T> multi) {
-        return multi.onTermination().invoke(cc::release);
     }
 }

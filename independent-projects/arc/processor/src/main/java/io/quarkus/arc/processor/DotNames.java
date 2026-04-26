@@ -73,8 +73,6 @@ import io.quarkus.arc.VetoedProducer;
 import io.quarkus.arc.WithCaching;
 import io.quarkus.arc.impl.ComputingCache;
 import io.quarkus.arc.impl.Identified;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
 
 public final class DotNames {
 
@@ -167,8 +165,9 @@ public final class DotNames {
     public static final DotName STRING = create(String.class);
 
     public static final DotName COMPLETION_STAGE = create(CompletionStage.class);
-    public static final DotName UNI = create(Uni.class);
-    public static final DotName MULTI = create(Multi.class);
+    // Mutiny is optional — use string-based names to avoid a compile-time class dependency
+    public static final DotName UNI = create("io.smallrye.mutiny.Uni");
+    public static final DotName MULTI = create("io.smallrye.mutiny.Multi");
 
     private DotNames() {
     }

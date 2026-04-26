@@ -12,7 +12,7 @@ module io.quarkus.arc {
     requires jakarta.interceptor;
     requires jakarta.transaction;
 
-    requires io.smallrye.mutiny;
+    requires static io.smallrye.mutiny;
     requires org.jboss.logging;
 
     uses io.quarkus.arc.ComponentsProvider;

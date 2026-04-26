@@ -18,6 +18,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>quarkus-arc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny</artifactId>
+        </dependency>
     </dependencies>
     
 </project>

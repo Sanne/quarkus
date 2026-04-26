@@ -469,7 +469,16 @@ public class InvokerGenerator extends AbstractGenerator {
             return returnValue;
         } else {
             ClassDesc asyncType = classDescOf(invoker.method.returnType());
-            return bc.invokeStatic(ClassMethodDesc.of(classDescOf(InvokerCleanupTasks.class), "deferRelease",
+            DotName returnTypeName = invoker.method.returnType().name();
+            // Mutiny is optional — use a string-based ClassDesc to avoid a compile-time
+            // dependency on MutinyInvokerCleanupTasks (which imports Mutiny types)
+            ClassDesc cleanupClass;
+            if (DotNames.UNI.equals(returnTypeName) || DotNames.MULTI.equals(returnTypeName)) {
+                cleanupClass = ClassDesc.of("io.quarkus.arc.impl.MutinyInvokerCleanupTasks");
+            } else {
+                cleanupClass = classDescOf(InvokerCleanupTasks.class);
+            }
+            return bc.invokeStatic(ClassMethodDesc.of(cleanupClass, "deferRelease",
                     MethodTypeDesc.of(asyncType, classDescOf(CreationalContext.class), asyncType)),
                     rootCC, returnValue);
         }
