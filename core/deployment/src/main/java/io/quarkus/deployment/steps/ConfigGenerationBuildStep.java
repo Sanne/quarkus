@@ -136,14 +136,17 @@ import io.smallrye.config.SmallRyeConfigProviderResolver;
 public class ConfigGenerationBuildStep {
     private static final String SERVICES_PREFIX = "META-INF/services/";
 
-    // Types which always have an explicit converter registered, so that SmallRye Config never needs to
-    // resolve an implicit converter for them reflectively. This is the union of:
-    //  - the SmallRye Config built-in converters (Converters.ALL_CONVERTERS)
-    //  - the converters Quarkus core itself registers via the Converter SPI
-    // (Copied as constants to avoid the processing overhead of computing the list, as they rarely change -
-    // we ensure they stay in sync via ConfigGenerationBuildStepTest)
-    private static final Set<String> BUILT_IN_CONVERTER_TYPES = Set.of(
-            // SmallRye Config built-ins:
+    // Types for which SmallRye Config itself always has a built-in, non-reflective converter
+    // (see Converters.ALL_CONVERTERS) and which Quarkus core does *not* also register a converter for
+    // via the Converter SPI. These need no reflection at all: SmallRye never needs to resolve an
+    // implicit converter for them reflectively, and there is no Quarkus-registered converter for them
+    // whose target type needs to be resolved via Class.forName either.
+    // Note some types with a SmallRye built-in converter (e.g. java.net.InetAddress) are deliberately
+    // NOT in this set, because Quarkus core also registers its own converter for them - see
+    // QUARKUS_CONVERTER_SPI_TYPES below.
+    // (Copied as a constant to avoid the processing overhead of computing the list, as it rarely changes -
+    // we ensure it stays in sync via ConfigGenerationBuildStepTest)
+    private static final Set<String> SMALLRYE_BUILT_IN_CONVERTER_TYPES = Set.of(
             "java.lang.String",
             "java.lang.Boolean",
             "java.lang.Double",
@@ -154,23 +157,35 @@ public class ConfigGenerationBuildStep {
             "java.lang.Byte",
             "java.lang.Character",
             "java.lang.Class",
-            "java.net.InetAddress",
             "java.util.UUID",
             "java.util.Currency",
             "java.util.BitSet",
-            "java.util.regex.Pattern",
-            "java.nio.file.Path",
             "java.io.File",
             "java.net.URI",
             "java.time.format.DateTimeFormatter",
             "java.lang.CharSequence",
             "java.util.OptionalInt",
             "java.util.OptionalLong",
-            "java.util.OptionalDouble",
-            // Registered by Quarkus core via the Converter SPI:
+            "java.util.OptionalDouble");
+
+    // Types for which Quarkus core itself registers a converter via the Converter SPI. These types are
+    // always given an explicit converter, so no *implicit* converter resolution is ever needed for
+    // them - but the generated config builder bytecode (see AbstractConfigBuilder#withConverter) still
+    // resolves the converter's target type via Class.forName(String) at runtime, in order to wire
+    // Quarkus's own converter onto the config builder; this requires the class itself (but none of its
+    // members) to be registered for reflection. This applies even to types that also have a SmallRye
+    // built-in converter (e.g. java.net.InetAddress, java.util.regex.Pattern, java.nio.file.Path):
+    // without the registration, Class.forName fails silently to wire Quarkus's converter, and SmallRye's
+    // built-in converter is used instead - which may not behave identically (e.g. missing trimming).
+    // (Copied as a constant to avoid the processing overhead of computing the list, as it rarely changes -
+    // we ensure it stays in sync via ConfigGenerationBuildStepTest)
+    private static final Set<String> QUARKUS_CONVERTER_SPI_TYPES = Set.of(
             "java.net.InetSocketAddress",
             "java.nio.charset.Charset",
             "io.smallrye.common.net.CidrAddress",
+            "java.net.InetAddress",
+            "java.util.regex.Pattern",
+            "java.nio.file.Path",
             "java.time.Duration",
             "java.util.Locale",
             "java.time.ZoneId",
@@ -418,18 +433,35 @@ public class ConfigGenerationBuildStep {
     }
 
     /**
-     * Registers a config property's raw type for reflection. Types which always have an explicit converter
-     * registered - the SmallRye Config built-ins, and the converters Quarkus core registers via the
-     * Converter SPI - need no reflection at all. Every other type needs full method reflection: either its
-     * converter is resolved via {@code Class.forName(String)} in the generated config builder bytecode, or
-     * SmallRye probes implicit converter methods ({@code valueOf}, {@code parse}, {@code of}, ...) reflectively.
+     * Registers a config property's raw type for reflection.
+     * <p>
+     * Types with a SmallRye Config built-in converter need no reflection at all - SmallRye never needs to
+     * resolve an implicit converter for them reflectively, and Quarkus never wires a converter for them
+     * either.
+     * <p>
+     * Types with a Quarkus-registered Converter SPI converter need the class itself registered for
+     * reflection - with no members - purely so that the generated config builder bytecode can resolve
+     * the converter's target type via {@code Class.forName(String)} at runtime (see
+     * {@code AbstractConfigBuilder#withConverter}); no implicit converter is ever resolved for these
+     * types either, so no method or constructor reflection is needed.
+     * <p>
+     * Every other type may need an implicit converter resolved reflectively (SmallRye probes
+     * {@code valueOf}, {@code parse}, {@code of}, ...), so it needs full method reflection.
      */
     private static void registerConverterReflection(
             Class<?> rawType,
             BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
 
         String rawTypeName = rawType.getName();
-        if (BUILT_IN_CONVERTER_TYPES.contains(rawTypeName)) {
+        if (SMALLRYE_BUILT_IN_CONVERTER_TYPES.contains(rawTypeName)) {
+            return;
+        }
+
+        if (QUARKUS_CONVERTER_SPI_TYPES.contains(rawTypeName)) {
+            reflectiveClasses.produce(ReflectiveClassBuildItem.builder(rawType)
+                    .reason("Required by Config Converter " + rawTypeName + " (Class.forName resolution only)")
+                    .constructors(false)
+                    .build());
             return;
         }
 

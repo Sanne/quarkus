@@ -16,14 +16,18 @@ import io.quarkus.deployment.util.ServiceUtil;
 import io.smallrye.config.Converters;
 
 /**
- * This test exists to verify that the constant field
- * ConfigGenerationBuildStep#BUILT_IN_CONVERTER_TYPES
- * is aligned with the content of the Smallrye Config version we depend on,
- * specifically it needs to match the union of:
- * - all converters included by default in Smallrye Config (field ALL_CONVERTERS in class io.smallrye.config.Converters)
- * - all additional converters provided by Quarkus by default (listed in
+ * This test exists to verify that the constant fields
+ * ConfigGenerationBuildStep#SMALLRYE_BUILT_IN_CONVERTER_TYPES and
+ * ConfigGenerationBuildStep#QUARKUS_CONVERTER_SPI_TYPES
+ * are aligned with the content of the Smallrye Config version we depend on and the converters
+ * Quarkus core itself registers, namely:
+ * - QUARKUS_CONVERTER_SPI_TYPES must match the target types of all converters provided by Quarkus by
+ * default (listed in
  * quarkus/core/runtime/src/main/resources/META-INF/services/org.eclipse.microprofile.config.spi.Converter)
- * If this test fails, it implies the hardcoded list in BUILT_IN_CONVERTER_TYPES needs to be updated.
+ * - SMALLRYE_BUILT_IN_CONVERTER_TYPES must match all converters included by default in Smallrye Config
+ * (field ALL_CONVERTERS in class io.smallrye.config.Converters), minus the types already covered by
+ * QUARKUS_CONVERTER_SPI_TYPES
+ * If this test fails, it implies the hardcoded lists need to be updated.
  */
 class ConfigGenerationBuildStepTest {
 
@@ -31,19 +35,31 @@ class ConfigGenerationBuildStepTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void builtInConverterTypesMatchSmallRyeConfig() throws Exception {
-        Set<String> actual = new TreeSet<>();
-        actual.addAll(smallRyeBuiltInConverterTypes());
-        actual.addAll(quarkusServiceLoadedConverterTypes());
+    void converterTypeSetsMatchSmallRyeConfigAndQuarkusCore() throws Exception {
+        Set<String> smallRyeTypes = smallRyeBuiltInConverterTypes();
+        Set<String> quarkusTypes = quarkusServiceLoadedConverterTypes();
 
-        Field quarkusField = ConfigGenerationBuildStep.class.getDeclaredField("BUILT_IN_CONVERTER_TYPES");
-        quarkusField.setAccessible(true);
-        Set<String> hardcoded = (Set<String>) quarkusField.get(null);
+        Field quarkusSpiField = ConfigGenerationBuildStep.class.getDeclaredField("QUARKUS_CONVERTER_SPI_TYPES");
+        quarkusSpiField.setAccessible(true);
+        Set<String> hardcodedQuarkusSpiTypes = (Set<String>) quarkusSpiField.get(null);
 
-        assertThat(new TreeSet<>(hardcoded))
-                .as("BUILT_IN_CONVERTER_TYPES must match the union of SmallRye Converters.ALL_CONVERTERS "
-                        + "and the set of converters provided by Quarkus core - update the hardcoded set if this fails")
-                .isEqualTo(actual);
+        assertThat(new TreeSet<>(hardcodedQuarkusSpiTypes))
+                .as("QUARKUS_CONVERTER_SPI_TYPES must match the target types of the converters provided by "
+                        + "Quarkus core - update the hardcoded set if this fails")
+                .isEqualTo(new TreeSet<>(quarkusTypes));
+
+        Field smallRyeBuiltInField = ConfigGenerationBuildStep.class.getDeclaredField("SMALLRYE_BUILT_IN_CONVERTER_TYPES");
+        smallRyeBuiltInField.setAccessible(true);
+        Set<String> hardcodedSmallRyeTypes = (Set<String>) smallRyeBuiltInField.get(null);
+
+        Set<String> expectedSmallRyeOnlyTypes = new TreeSet<>(smallRyeTypes);
+        expectedSmallRyeOnlyTypes.removeAll(quarkusTypes);
+
+        assertThat(new TreeSet<>(hardcodedSmallRyeTypes))
+                .as("SMALLRYE_BUILT_IN_CONVERTER_TYPES must match SmallRye Converters.ALL_CONVERTERS types "
+                        + "that are not also registered by Quarkus core via the Converter SPI - update the "
+                        + "hardcoded set if this fails")
+                .isEqualTo(expectedSmallRyeOnlyTypes);
     }
 
     @SuppressWarnings("unchecked")
@@ -58,7 +74,7 @@ class ConfigGenerationBuildStepTest {
     }
 
     /**
-     * The converter types Quarkus core registers via the {@link Converter} SPI. Only the Quarkus core
+     * The converter target types Quarkus core registers via the {@link Converter} SPI. Only the Quarkus core
      * runtime declares such a service file on this module's test classpath, so this resolves to the
      * contents of {@code core/runtime/src/main/resources/META-INF/services/org.eclipse.microprofile.config.spi.Converter}.
      */
