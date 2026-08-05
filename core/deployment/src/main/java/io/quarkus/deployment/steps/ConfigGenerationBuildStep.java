@@ -81,6 +81,7 @@ import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildI
 import io.quarkus.deployment.builditem.nativeimage.ServiceProviderBuildItem;
 import io.quarkus.deployment.configuration.DotNames;
 import io.quarkus.deployment.configuration.RunTimeConfigurationGenerator;
+import io.quarkus.deployment.configuration.SmallRyeBuiltInConverterTypes;
 import io.quarkus.deployment.configuration.tracker.ConfigTrackingConfig;
 import io.quarkus.deployment.configuration.tracker.ConfigTrackingWriter;
 import io.quarkus.deployment.pkg.builditem.ArtifactResultBuildItem;
@@ -135,39 +136,6 @@ import io.smallrye.config.SmallRyeConfigProviderResolver;
 
 public class ConfigGenerationBuildStep {
     private static final String SERVICES_PREFIX = "META-INF/services/";
-
-    // Types with a SmallRye Config built-in converter (Converters.ALL_CONVERTERS) that Quarkus core does
-    // NOT also register a converter for via the Converter SPI - these need no reflection at all.
-    //
-    // Types Quarkus DOES register an SPI converter for (e.g. Duration, Locale, InetAddress, Pattern) are
-    // deliberately excluded here, even where SmallRye also has a built-in: the generated config builder
-    // resolves the SPI converter's target type via Class.forName(String) at runtime (see
-    // AbstractConfigBuilder#withConverter), and on Mandrel that resolution is only reliable when the
-    // class has at least its public methods registered - constructors-only is not enough (see
-    // registerConverterReflection below, which registers public methods for every type not in this set).
-    // (Copied as a constant to avoid the processing overhead of computing the list, as it rarely changes -
-    // kept in sync via ConfigGenerationBuildStepTest)
-    private static final Set<String> SMALLRYE_BUILT_IN_CONVERTER_TYPES = Set.of(
-            "java.lang.String",
-            "java.lang.Boolean",
-            "java.lang.Double",
-            "java.lang.Float",
-            "java.lang.Long",
-            "java.lang.Integer",
-            "java.lang.Short",
-            "java.lang.Byte",
-            "java.lang.Character",
-            "java.lang.Class",
-            "java.util.UUID",
-            "java.util.Currency",
-            "java.util.BitSet",
-            "java.io.File",
-            "java.net.URI",
-            "java.time.format.DateTimeFormatter",
-            "java.lang.CharSequence",
-            "java.util.OptionalInt",
-            "java.util.OptionalLong",
-            "java.util.OptionalDouble");
 
     @BuildStep
     void nativeSupport(BuildProducer<RuntimeInitializedClassBuildItem> runtimeInitializedClassProducer) {
@@ -410,17 +378,18 @@ public class ConfigGenerationBuildStep {
     }
 
     /**
-     * Registers a config property's raw type for reflection, unless it's in
-     * {@link #SMALLRYE_BUILT_IN_CONVERTER_TYPES}. Public methods are enough: types with no explicit
-     * converter rely on this for SmallRye to probe implicit converter methods ({@code valueOf},
-     * {@code parse}, {@code of}, ...), which per the MicroProfile Config spec are always public.
+     * Registers a config property's raw type for reflection, unless it's a
+     * {@link SmallRyeBuiltInConverterTypes#isBuiltIn(String) built-in converter type}. Public methods are
+     * enough: types with no explicit converter rely on this for SmallRye to probe implicit converter
+     * methods ({@code valueOf}, {@code parse}, {@code of}, ...), which per the MicroProfile Config spec are
+     * always public.
      */
     private static void registerConverterReflection(
             Class<?> rawType,
             BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
 
         String rawTypeName = rawType.getName();
-        if (SMALLRYE_BUILT_IN_CONVERTER_TYPES.contains(rawTypeName)) {
+        if (SmallRyeBuiltInConverterTypes.isBuiltIn(rawTypeName)) {
             return;
         }
 

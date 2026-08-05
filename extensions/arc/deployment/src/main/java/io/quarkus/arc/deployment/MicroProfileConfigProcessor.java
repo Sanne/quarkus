@@ -56,6 +56,7 @@ import io.quarkus.deployment.builditem.ConfigPropertiesRegistrarBuildItem;
 import io.quarkus.deployment.builditem.GeneratedConfigClassBuildItem;
 import io.quarkus.deployment.builditem.ServiceStartBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
+import io.quarkus.deployment.configuration.SmallRyeBuiltInConverterTypes;
 import io.smallrye.config.inject.ConfigProducer;
 
 /**
@@ -104,10 +105,12 @@ public class MicroProfileConfigProcessor {
         }
 
         for (Type type : customBeanTypes) {
-            if (type.kind() != Kind.ARRAY) {
-                // Implicit converters are most likely used
+            String typeName = type.name().toString();
+            if (type.kind() != Kind.ARRAY && !SmallRyeBuiltInConverterTypes.isBuiltIn(typeName)) {
+                // Implicit or explicit converters are most likely used; public methods are enough, see
+                // SmallRyeBuiltInConverterTypes for why built-in types are skipped entirely
                 reflectiveClass
-                        .produce(ReflectiveClassBuildItem.builder(type.name().toString()).methods()
+                        .produce(ReflectiveClassBuildItem.builder(typeName).publicMethods()
                                 .reason(getClass().getName() + " Custom config bean")
                                 .build());
             }
@@ -118,7 +121,7 @@ public class MicroProfileConfigProcessor {
                     .providerType(type)
                     .types(type)
                     .addQualifier(MP_CONFIG_PROPERTY)
-                    .param("requiredType", type.name().toString()).done());
+                    .param("requiredType", typeName).done());
         }
     }
 
@@ -404,12 +407,21 @@ public class MicroProfileConfigProcessor {
                 MP_CONFIG_VALUE.equals(type.name());
     }
 
+    /**
+     * Registers a config property's raw type (and, for parameterized types, its type arguments) for
+     * reflection, unless it's a {@link SmallRyeBuiltInConverterTypes#isBuiltIn(String) built-in converter
+     * type}. Only constructors (the {@link ReflectiveClassBuildItem} builder default) are needed here: this
+     * registration only supports resolving the type via {@code Class.forName} for startup validation
+     * ({@link MicroProfileConfigRecorder#validateConfigProperties}) - method reflection for the type's
+     * converter, if it needs any, is registered separately by {@link #registerCustomConfigBeanTypes}.
+     */
     private static ConfigValidationMetadata configPropertyToConfigValidation(ConfigPropertyBuildItem configProperty,
             BuildProducer<ReflectiveClassBuildItem> reflectiveClass) {
         String typeName = configProperty.getPropertyType().name().toString();
         List<String> typeArgumentNames = Collections.emptyList();
 
-        if (configProperty.getPropertyType().kind() != Kind.PRIMITIVE) {
+        if (configProperty.getPropertyType().kind() != Kind.PRIMITIVE
+                && !SmallRyeBuiltInConverterTypes.isBuiltIn(typeName)) {
             reflectiveClass.produce(ReflectiveClassBuildItem.builder(typeName)
                     .reason(MicroProfileConfigProcessor.class.getSimpleName() + " Configuration property")
                     .build());
@@ -424,7 +436,7 @@ public class MicroProfileConfigProcessor {
             for (Type argumentType : argumentTypes) {
                 final var argTypeClassName = argumentType.name().toString();
                 typeArgumentNames.add(argTypeClassName);
-                if (argumentType.kind() != Kind.PRIMITIVE) {
+                if (argumentType.kind() != Kind.PRIMITIVE && !SmallRyeBuiltInConverterTypes.isBuiltIn(argTypeClassName)) {
                     forReflection.add(argTypeClassName);
                 }
             }

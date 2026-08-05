@@ -1,4 +1,4 @@
-package io.quarkus.deployment.steps;
+package io.quarkus.deployment.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,25 +16,20 @@ import io.quarkus.deployment.util.ServiceUtil;
 import io.smallrye.config.Converters;
 
 /**
- * Verifies that ConfigGenerationBuildStep#SMALLRYE_BUILT_IN_CONVERTER_TYPES matches SmallRye's own
- * built-in converters (Converters.ALL_CONVERTERS), minus any type Quarkus core also registers a
- * converter for via the Converter SPI. If this test fails, update the hardcoded set.
+ * Verifies that SmallRyeBuiltInConverterTypes#NAMES matches SmallRye's own built-in converters
+ * (Converters.ALL_CONVERTERS), minus any type Quarkus core also registers a converter for via the
+ * Converter SPI. If this test fails, update the hardcoded set.
  */
-class ConfigGenerationBuildStepTest {
+class SmallRyeBuiltInConverterTypesTest {
 
     private static final String CONVERTER_SERVICES = "META-INF/services/" + Converter.class.getName();
 
     @Test
-    @SuppressWarnings("unchecked")
     void smallRyeBuiltInConverterTypesIsCorrect() throws Exception {
         Set<String> expectedTypes = new TreeSet<>(smallRyeBuiltInConverterTypes());
         expectedTypes.removeAll(quarkusServiceLoadedConverterTypes());
 
-        Field field = ConfigGenerationBuildStep.class.getDeclaredField("SMALLRYE_BUILT_IN_CONVERTER_TYPES");
-        field.setAccessible(true);
-        Set<String> hardcodedTypes = (Set<String>) field.get(null);
-
-        assertThat(new TreeSet<>(hardcodedTypes)).isEqualTo(expectedTypes);
+        assertThat(new TreeSet<>(SmallRyeBuiltInConverterTypes.NAMES)).isEqualTo(expectedTypes);
     }
 
     @SuppressWarnings("unchecked")
